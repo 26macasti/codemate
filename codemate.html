@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeMate — Imparo a programmare con la matematica</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Trebuchet MS", Verdana, sans-serif;
+    background: linear-gradient(160deg, #6a5cff 0%, #8f6aff 45%, #b96aff 100%);
+    min-height: 100vh;
+    color: #2d2350;
+    padding: 20px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  header {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+  header h1 { font-size: 2.2rem; text-shadow: 0 3px 8px rgba(0,0,0,.25); }
+  header p { opacity: .95; margin-top: 6px; font-size: 1.05rem; }
+  #stars {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(255,255,255,.25);
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    margin-bottom: 20px;
+  }
+  .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .level-btn {
+    border: 3px solid transparent;
+    border-radius: 18px;
+    padding: 18px 10px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    transition: transform .15s, border-color .15s;
+    text-align: center;
+  }
+  .level-btn small { display: block; font-weight: normal; margin-top: 6px; opacity: .9; font-size: .82rem; }
+  .level-btn:hover { transform: translateY(-4px) scale(1.03); }
+  .level-btn.active { border-color: #ffd83d; box-shadow: 0 0 0 4px rgba(255,216,61,.45); }
+  .l1 { background: #ff7043; } .l2 { background: #ffa726; }
+  .l3 { background: #66bb6a; } .l4 { background: #29b6f6; }
+  .l5 { background: #ab47bc; }
+  #exercise-area { display: none; }
+  .ex-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .badge {
+    background: #efeaff; color: #5b3fd4;
+    padding: 6px 14px; border-radius: 999px; font-weight: bold; font-size: .9rem;
+  }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: #d9d2f5; }
+  .dot.done { background: #66bb6a; }
+  .dot.current { background: #5b3fd4; transform: scale(1.25); }
+  .question { font-size: 1.25rem; margin: 20px 0 6px; line-height: 1.5; }
+  .code {
+    font-family: "Consolas", "Courier New", monospace;
+    background: #2d2350; color: #a5f3c8;
+    border-radius: 14px; padding: 16px 20px;
+    font-size: 1.1rem; line-height: 1.7;
+    margin: 14px 0;
+    white-space: pre-wrap;
+  }
+  .code .kw { color: #ffd83d; font-weight: bold; }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-top: 18px; }
+  .opt {
+    font-size: 1.4rem; font-weight: bold; padding: 18px 8px;
+    border: 3px solid #e2dcf7; background: #f7f5ff; color: #2d2350;
+    border-radius: 16px; cursor: pointer; transition: all .15s;
+  }
+  .opt:hover { border-color: #8f6aff; background: #efeaff; transform: scale(1.04); }
+  .opt.correct { background: #c8f7cf; border-color: #43a047; }
+  .opt.wrong { background: #ffd6d6; border-color: #e53935; }
+  .feedback {
+    min-height: 34px; margin-top: 16px; font-size: 1.15rem; font-weight: bold;
+  }
+  .feedback.ok { color: #2e7d32; }
+  .feedback.ko { color: #c62828; }
+  .btn {
+    border: none; border-radius: 14px; padding: 12px 22px;
+    font-size: 1rem; font-weight: bold; cursor: pointer;
+    background: #5b3fd4; color: #fff; transition: transform .15s;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn.secondary { background: #b0a6e0; }
+  .robot-line { display: flex; align-items: flex-end; gap: 4px; margin: 22px 0 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; }
+  .cell { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+  .cell .num { font-weight: bold; color: #5b3fd4; }
+  .cell .spot {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #efeaff; display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .cell.target .spot { outline: 3px dashed #ff7043; outline-offset: 3px; }
+  .cell.target .num::after { content: " 🎯"; }
+  .program {
+    background: #2d2350; color: #a5f3c8; border-radius: 14px;
+    padding: 14px 18px; font-family: Consolas, monospace; font-size: 1.05rem;
+    min-height: 52px; margin: 12px 0;
+  }
+  .cmd-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cmd-btns .btn { font-size: 1.15rem; }
+  .level-intro { margin: 8px 0 4px; color: #6a5cd0; font-style: italic; }
+  footer { text-align: center; color: rgba(255,255,255,.85); margin-top: 10px; font-size: .9rem; }
+  .complete { text-align: center; }
+  .complete .big { font-size: 3rem; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🤖 CodeMate</h1>
+    <p>Imparo a programmare con la matematica — dalla 1ª alla 5ª classe</p>
+    <div id="stars">⭐ Stelle: <span id="star-count">0</span></div>
+  </header>
+
+  <div class="card" id="level-card">
+    <h2>Scegli la tua classe 👇</h2>
+    <div class="levels" id="levels"></div>
+  </div>
+
+  <div class="card" id="exercise-area">
+    <div class="ex-top">
+      <span class="badge" id="level-badge"></span>
+      <div class="dots" id="dots"></div>
+      <button class="btn secondary" onclick="backToLevels()">← Classi</button>
+    </div>
+    <div id="exercise-content"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <footer>Fatto per la scuola primaria · funziona anche senza internet 💜</footer>
+</div>
+
+<script>
+"use strict";
+
+const LEVELS = {
+  1: { name: "Classe 1ª", cls: "l1", topic: "Le sequenze di comandi",
+       intro: "Il robot esegue i comandi nell'ordine in cui li metti nel programma!",
+       make: makeRobotEx },
+  2: { name: "Classe 2ª", cls: "l2", topic: "I cicli: ripeti!",
+       intro: "Con il ciclo RIPETI possiamo fare la stessa cosa molte volte senza riscriverlo.",
+       make: makeLoopEx },
+  3: { name: "Classe 3ª", cls: "l3", topic: "Tabelline = cicli",
+       intro: "La moltiplicazione è un ciclo che somma sempre lo stesso numero!",
+       make: makeTimesEx },
+  4: { name: "Classe 4ª", cls: "l4", topic: "Le variabili",
+       intro: "Una variabile è una scatola con un nome: dentro c'è un numero che può cambiare.",
+       make: makeVarEx },
+  5: { name: "Classe 5ª", cls: "l5", topic: "Se... allora... e le funzioni",
+       intro: "Il computer decide in base alle condizioni, e le funzioni riusano i calcoli!",
+       make: makeIfEx }
+};
+
+const TOTAL = 5;
+let stars = 0;
+let level = null;
+let index = 0;
+let current = null;
+let locked = false;
+
+const $ = id => document.getElementById(id);
+
+function initLevels() {
+  const box = $("levels");
+  for (const n of Object.keys(LEVELS)) {
+    const L = LEVELS[n];
+    const b = document.createElement("button");
+    b.className = "level-btn " + L.cls;
+    b.innerHTML = L.name + "<small>" + L.topic + "</small>";
+    b.onclick = () => startLevel(+n);
+    box.appendChild(b);
+  }
+}
+
+function startLevel(n) {
+  level = n; index = 0;
+  document.querySelectorAll(".level-btn").forEach((b, i) =>
+    b.classList.toggle("active", i === n - 1));
+  $("level-card").style.display = "none";
+  $("exercise-area").style.display = "block";
+  nextExercise();
+}
+
+function backToLevels() {
+  level = null;
+  $("level-card").style.display = "block";
+  $("exercise-area").style.display = "none";
+}
+
+function updateDots() {
+  const d = $("dots");
+  d.innerHTML = "";
+  for (let i = 0; i < TOTAL; i++) {
+    const s = document.createElement("span");
+    s.className = "dot" + (i < index ? " done" : i === index ? " current" : "");
+    d.appendChild(s);
+  }
+}
+
+function addStar() {
+  stars++;
+  $("star-count").textContent = stars;
+}
+
+function nextExercise() {
+  locked = false;
+  $("feedback").textContent = "";
+  $("feedback").className = "feedback";
+  updateDots();
+  if (index >= TOTAL) { showComplete(); return; }
+  const L = LEVELS[level];
+  $("level-badge").textContent = L.name + " · " + L.topic;
+  current = L.make();
+  renderExercise(current);
+}
+
+function renderExercise(ex) {
+  const c = $("exercise-content");
+  if (ex.type === "choice") {
+    c.innerHTML =
+      '<p class="level-intro">' + LEVELS[level].intro + "</p>" +
+      '<div class="question">' + ex.question + "</div>" +
+      (ex.code ? '<div class="code">' + ex.code + "</div>" : "") +
+      '<div class="options" id="options"></div>';
+    const box = $("options");
+    ex.options.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = opt;
+      b.onclick = () => answerChoice(i, b);
+      box.appendChild(b);
+    });
+  } else if (ex.type === "robot") {
+    c.innerHTML =
+      '<p class="level-intro">' + LEVELS[level].intro + "</p>" +
+      '<div class="question">Porta il robot esattamente sul <b>' + ex.target + "</b>! Costruisci il programma e premi <b>▶ Esegui</b>.</div>" +
+      '<div class="robot-line" id="robot-line"></div>' +
+      '<div class="program" id="program">Programma: (vuoto)</div>' +
+      '<div class="cmd-btns">' +
+        '<button class="btn" onclick="addCmd(1)">➡️ avanti 1</button>' +
+        '<button class="btn" onclick="addCmd(-1)">⬅️ indietro 1</button>' +
+        '<button class="btn secondary" onclick="undoCmd()">↩️ Annulla ultimo</button>' +
+        '<button class="btn secondary" onclick="clearCmds()">🗑️ Svuota</button>' +
+        '<button class="btn" onclick="runProgram()">▶ Esegui</button>' +
+      "</div>";
+    drawRobot();
+  }
+}
+
+function drawRobot() {
+  const ex = current;
+  const line = $("robot-line");
+  line.innerHTML = "";
+  for (let n = 0; n <= 12; n++) {
+    const cell = document.createElement("div");
+    cell.className = "cell" + (n === ex.target ? " target" : "");
+    cell.innerHTML =
+      '<div class="spot">' + (n === ex.pos ? "🤖" : "") + "</div>" +
+      '<div class="num">' + n + "</div>";
+    line.appendChild(cell);
+  }
+}
+
+function addCmd(v) {
+  if (locked) return;
+  current.program.push(v);
+  updateProgram();
+}
+
+function undoCmd() {
+  if (locked) return;
+  current.program.pop();
+  updateProgram();
+}
+
+function clearCmds() {
+  if (locked) return;
+  current.program = [];
+  updateProgram();
+}
+
+function updateProgram() {
+  const p = current.program;
+  $("program").textContent = "Programma: " +
+    (p.length ? p.map(v => v > 0 ? "avanti" : "indietro").join(" → ") : "(vuoto)");
+}
+
+function runProgram() {
+  if (locked) return;
+  const ex = current;
+  let pos = 0;
+  const steps = [];
+  for (const v of ex.program) { pos += v; steps.push(pos); }
+  const animate = i => {
+    if (i >= steps.length) { finishRun(pos); return; }
+    ex.pos = Math.max(0, Math.min(12, steps[i]));
+    drawRobot();
+    setTimeout(() => animate(i + 1), 350);
+  };
+  animate(0);
+}
+
+function finishRun(pos) {
+  const fb = $("feedback");
+  if (pos === current.target) {
+    locked = true;
+    fb.textContent = "🎉 Bravo! Il robot è arrivato a " + pos + "!";
+    fb.className = "feedback ok";
+    addStar();
+    index++;
+    setTimeout(nextExercise, 1400);
+  } else {
+    fb.textContent = "Ops, il robot è arrivato a " + pos + " invece che a " + current.target + ". Riprova!";
+    fb.className = "feedback ko";
+  }
+}
+
+function answerChoice(i, btn) {
+  if (locked) return;
+  const fb = $("feedback");
+  if (i === current.correct) {
+    locked = true;
+    btn.classList.add("correct");
+    fb.textContent = "✅ Esatto! " + current.explain;
+    fb.className = "feedback ok";
+    addStar();
+    index++;
+    setTimeout(nextExercise, 1600);
+  } else {
+    btn.classList.add("wrong");
+    fb.textContent = "❌ Non è così: riprova con calma! 💪";
+    fb.className = "feedback ko";
+  }
+}
+
+function showComplete() {
+  $("dots").innerHTML = "";
+  $("exercise-content").innerHTML =
+    '<div class="complete">' +
+      '<div class="big">🏆</div>' +
+      "<h2>Complimenti! Hai finito tutte le sfide di " + LEVELS[level].name + "!</h2>" +
+      '<p style="margin:12px 0">Hai guadagnato ' + TOTAL + " stelle ⭐</p>" +
+      '<button class="btn" onclick="backToLevels()">Scegli un\u2019altra classe</button>' +
+    "</div>";
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildOptions(answer, candidates) {
+  const set = new Set([answer]);
+  for (const c of shuffle([...candidates])) {
+    if (set.size >= 4) break;
+    if (c >= 0 && !set.has(c)) set.add(c);
+  }
+  let off = 1;
+  while (set.size < 4) {
+    for (const c of [answer + off, answer - off]) {
+      if (set.size < 4 && c >= 0 && !set.has(c)) set.add(c);
+    }
+    off++;
+  }
+  return shuffle([...set]);
+}
+
+function choiceEx(question, code, answer, distractors, explain) {
+  const opts = buildOptions(answer, distractors);
+  return {
+    type: "choice",
+    question,
+    code,
+    options: opts,
+    correct: opts.indexOf(answer),
+    explain
+  };
+}
+
+const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+function makeRobotEx() {
+  return {
+    type: "robot",
+    target: ri(3, 10),
+    pos: 0,
+    program: []
+  };
+}
+
+function makeLoopEx() {
+  const start = ri(0, 4);
+  const step = ri(2, 5);
+  const times = ri(2, 4);
+  const ans = start + step * times;
+  const code =
+    "<span class='kw'>ripeti</span> " + times + " volte {\n" +
+    "&nbsp;&nbsp;avanti " + step + "\n}";
+  const d1 = start + step * (times - 1), d2 = start + step * (times + 1), d3 = start + step;
+  return choiceEx(
+    "Il robot parte da <b>" + start + "</b>. Dove arriva dopo il programma?",
+    code,
+    ans,
+    [d1, d2, d3],
+    "Partendo da " + start + ", hai fatto " + times + " passi da " + step + ": " +
+      start + " + " + step + " × " + times + " = " + ans + "."
+  );
+}
+
+function makeTimesEx() {
+  const a = ri(2, 9);
+  const b = ri(2, 9);
+  const ans = a * b;
+  const code =
+    "<span class='kw'>ripeti</span> " + b + " volte {\n" +
+    "&nbsp;&nbsp;somma " + a + "\n}";
+  const d1 = a + b, d2 = a * (b + 1), d3 = (a + 1) * b;
+  return choiceEx(
+    "Quale numero calcola questo programma? (È la tabellina!)",
+    code,
+    ans,
+    [d1, d2, d3],
+    "Sommi " + a + " per " + b + " volte: " + a + " × " + b + " = " + ans + "."
+  );
+}
+
+function makeVarEx() {
+  const a0 = ri(2, 9);
+  const p = ri(2, 6);
+  const m = ri(2, 3);
+  const afterAdd = a0 + p;
+  const ans = afterAdd * m;
+  const code =
+    "a = " + a0 + "\n" +
+    "a = a + " + p + "\n" +
+    "a = a × " + m + "\n" +
+    "<span class='kw'>scrivi</span> a";
+  const d1 = a0 * m + p, d2 = a0 + p + m, d3 = a0 * m;
+  return choiceEx(
+    "Cosa scrive il programma? Segui la scatola <b>a</b> passo per passo!",
+    code,
+    ans,
+    [d1, d2, d3],
+    "a parte da " + a0 + ", diventa " + afterAdd + " e poi " + afterAdd + " × " + m + " = " + ans + "."
+  );
+}
+
+function makeIfEx() {
+  if (Math.random() < 0.5) {
+    const a = ri(3, 12);
+    const t = ri(4, 8);
+    const d = ri(1, 4);
+    const isGreater = a > t;
+    const ans = isGreater ? a - d : a + d;
+    const code =
+      "a = " + a + "\n" +
+      "<span class='kw'>se</span> a > " + t + " <span class='kw'>allora</span>\n" +
+      "&nbsp;&nbsp;a = a − " + d + "\n" +
+      "<span class='kw'>altrimenti</span>\n" +
+      "&nbsp;&nbsp;a = a + " + d + "\n" +
+      "<span class='kw'>scrivi</span> a";
+    const d1 = isGreater ? a + d : a - d, d2 = a, d3 = a + d + 1;
+    return choiceEx(
+      "Quale numero scrive il programma? Attenzione alla condizione!",
+      code,
+      ans,
+      [d1, d2, d3],
+      "a vale " + a + (isGreater
+        ? ", che è maggiore di " + t + ": quindi a − " + d + " = " + ans + "."
+        : ", che NON è maggiore di " + t + ": quindi a + " + d + " = " + ans + ".")
+    );
+  }
+  const x = ri(2, 9);
+  const y = ri(1, 9);
+  const ans = x * 2 + y;
+  const code =
+    "<span class='kw'>funzione</span> doppio(n):\n" +
+    "&nbsp;&nbsp;<span class='kw'>restituisci</span> n × 2\n\n" +
+    "r = doppio(" + x + ") + " + y + "\n" +
+    "<span class='kw'>scrivi</span> r";
+  const d1 = x + y, d2 = x * 2 - y, d3 = x * 3 + y;
+  return choiceEx(
+    "Quale numero scrive il programma? Usa la funzione!",
+    code,
+    ans,
+    [d1, d2, d3],
+    "doppio(" + x + ") = " + (x * 2) + ", poi " + (x * 2) + " + " + y + " = " + ans + "."
+  );
+}
+
+initLevels();
+</script>
+</body>
+</html>
