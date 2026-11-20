@@ -1279,6 +1279,7 @@ function descriviMosse(dr, dc){
 function rendiDebug(card, ex, fine){
   const pulito = { ok: true };
   let fase = 1;
+  const controllati = new Set();
   const testa = crea('div', 'es-testa');
   card.appendChild(testa);
   const obiettivo = 'Il robot deve arrivare al tesoro 💎, ma in questo programma c\u2019è UNA SOLA istruzione sbagliata. Tocca l\u2019istruzione che non va!<div class="indizio">Suggerimento: simula il programma passo passo e trova il momento in cui il robot si allontana dal tesoro.</div>';
@@ -1301,7 +1302,9 @@ function rendiDebug(card, ex, fine){
     ex.prog.forEach((f, i) => {
       let cls = 'prog-ins';
       if (fase === 2 && i === ex.erroreIdx) cls += ' err';
-      const b = crea('button', cls, (i + 1) + '. ' + FRECCE[f].em + ' ' + f);
+      else if (controllati.has(i)) cls += ' okg';
+      const b = crea('button', cls, (i + 1) + '. ' + FRECCE[f].em + ' ' + f + (controllati.has(i) ? ' ✅' : ''));
+      b.disabled = controllati.has(i);
       b.onclick = () => {
         if (fase !== 1) return;
         if (i === ex.erroreIdx){
@@ -1322,9 +1325,11 @@ function rendiDebug(card, ex, fine){
           pulito.ok = false;
           let msg;
           if (i < ex.erroreIdx){
-            msg = 'L\u2019istruzione ' + (i + 1) + ' («' + FRECCE[f].em + ' ' + f + '») va bene cos\u00ec: per i primi ' + (i + 1) + ' passi il robot resta sulla buona strada verso il tesoro. C\u2019è UN solo errore: guarda i passi DOPO questo!';
+            controllati.add(i);
+            ridisegnaProgramma();
+            msg = 'L\u2019istruzione ' + (i + 1) + ' («' + FRECCE[f].em + ' ' + f + '») va bene cos\u00ec: per i primi ' + (i + 1) + ' passi il robot resta sulla buona strada verso il tesoro. C\u2019è UN solo errore: guarda i passi DOPO questo! \ud83d\udc49 Tocca un\u2019altra istruzione del programma per controllarla!';
           } else {
-            msg = 'Il problema nasce PRIMA del pass ' + (i + 1) + ': quando il robot arriva lì, la strada è già andata storta per colpa di un pass precedente. C\u2019è una sola istruzione sbagliata: ricontrolla i primi passi!';
+            msg = 'Il problema nasce PRIMA del pass ' + (i + 1) + ': quando il robot arriva lì, la strada è già andata storta per colpa di un pass precedente. C\u2019è una sola istruzione sbagliata: ricontrolla i passi DOPO il primo!';
           }
           mostraSbaglio(card, msg);
         }
