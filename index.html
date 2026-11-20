@@ -354,7 +354,8 @@ function mostraGiusto(card, html, cb){
   btn.onclick = cb;
   b.appendChild(btn);
   f.appendChild(b);
-  window.scrollTo(0, 0);
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  return f;
 }
 function mostraSbaglio(card, html){
   const f = boxFeedback(card);
@@ -1341,11 +1342,10 @@ function rendiDebug(card, ex, fine){
       finitoD = true;
       progList.querySelectorAll('button').forEach(x => x.disabled = true);
       testa.innerHTML = grigliaHtml(mc, sim.passi[sim.passi.length - 1], sim.passi);
-      mostraGiusto(card, '«' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': era proprio quello che mancava! Ora il programma porta il robot esattamente al tesoro 💎. Hai fatto da vero DEBUGGER: hai trovato e corretto l\u2019errore! 🐛🔧', () => fine(pulito.ok));
-      post.innerHTML = '';
+      post.innerHTML = '✅ <b>Corretto!</b> Il robot ora arriva al tesoro: la spiegazione è qui sotto 👇';
+      mostraGiusto(card, '«' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': era proprio quello che mancava! Ora il programma porta il robot esattamente al tesoro 💎. Hai fatto da vero DEBUGGER: hai trovato e corretto l’errore! 🐛🔧', () => fine(pulito.ok));
     } else {
       pulito.ok = false;
-      window.scrollTo(0, document.body.scrollHeight);
       if (sim.crash) mostraSbaglio(card, 'Con «' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': ' + messaggioCrash(sim, progMod) + ' Prova un\u2019altra freccia!');
       else mostraSbaglio(card, 'Con «' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': ' + messaggioFine(sim) + ' Prova un\u2019altra freccia!');
     }
