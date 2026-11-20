@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeMate 2.0 — Imparo matematica e coding giocando</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Comic Sans MS", "Segoe UI", "Trebuchet MS", Verdana, sans-serif;
+    background: linear-gradient(160deg, #7ec8ff 0%, #a78bfa 45%, #ff9ec7 100%);
+    min-height: 100vh;
+    color: #33205a;
+    padding: 16px;
+  }
+  body.tutto-mau * { text-transform: uppercase; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  header { text-align: center; color: #fff; margin: 8px 0 18px; }
+  header h1 { font-size: 2rem; text-shadow: 0 3px 8px rgba(0,0,0,.25); }
+  header .sotto { opacity: .97; margin-top: 4px; font-weight: bold; }
+  #contatore-stelle {
+    display: inline-block; margin-top: 10px;
+    background: rgba(255,255,255,.32); padding: 6px 20px;
+    border-radius: 999px; font-weight: bold; font-size: 1.15rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  }
+  .card {
+    background: #fff; border-radius: 24px; padding: 22px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.22); margin-bottom: 16px;
+  }
+  .big-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .big-btn {
+    border: none; border-radius: 20px; padding: 22px 12px;
+    font-size: 1.25rem; font-weight: bold; color: #fff; cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,.18); transition: transform .12s; font-family: inherit;
+  }
+  .big-btn small { display: block; font-size: .85rem; font-weight: normal; opacity: .95; margin-top: 6px; }
+  .big-btn:hover { transform: translateY(-3px); }
+  .bg-mat { background: linear-gradient(135deg, #ff7043, #ff9f43); }
+  .bg-cod { background: linear-gradient(135deg, #26a69a, #4dd0e1); }
+  .bg-cl1 { background: linear-gradient(135deg, #ef5350, #ff8a65); }
+  .bg-cl2 { background: linear-gradient(135deg, #ff7043, #ffa726); }
+  .bg-cl3 { background: linear-gradient(135deg, #f57c00, #ffb300); }
+  .bg-cl4 { background: linear-gradient(135deg, #26a69a, #66bb6a); }
+  .bg-cl5 { background: linear-gradient(135deg, #5c6bc0, #ab47bc); }
+  .bg-l1  { background: linear-gradient(135deg, #66bb6a, #9ccc65); }
+  .bg-l2  { background: linear-gradient(135deg, #ffa726, #ffca28); }
+  .bg-l3  { background: linear-gradient(135deg, #ef5350, #ff7043); }
+  .liv-stelle { font-size: 1rem; margin-top: 8px; letter-spacing: 2px; }
+  .btn-mini {
+    background: #fff; border: 2px solid #dcd2f5; border-radius: 999px;
+    padding: 6px 14px; font-weight: bold; cursor: pointer; font-family: inherit; color: #5b47a8;
+    font-size: .95rem;
+  }
+  .btn-mini:hover { background: #f0ecff; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; color: #fff; font-weight: bold; flex-wrap: wrap; }
+  .es-card { font-size: 1.12rem; }
+  .es-testa { margin-bottom: 14px; }
+  .es-domanda {
+    font-size: 1.2rem; font-weight: bold; margin-bottom: 14px;
+    background: #fff6d6; border: 2px dashed #ffca28; border-radius: 14px; padding: 12px;
+  }
+  .op-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .op-btn {
+    border: none; border-radius: 16px; padding: 16px 8px;
+    font-size: 1.3rem; font-weight: bold; cursor: pointer; color: #fff;
+    box-shadow: 0 5px 0 rgba(0,0,0,.15); font-family: inherit; word-break: break-word;
+  }
+  .op-btn:hover { filter: brightness(1.08); }
+  .op-btn.c0 { background: #ff7043; } .op-btn.c1 { background: #42a5f5; }
+  .op-btn.c2 { background: #66bb6a; } .op-btn.c3 { background: #ab47bc; }
+  .op-btn.c4 { background: #ffa726; } .op-btn.c5 { background: #26a69a; }
+  .feedback { margin-top: 14px; }
+  .fb { border-radius: 16px; padding: 14px; font-size: 1.08rem; line-height: 1.5; }
+  .fb-giusto { background: #e2f7e1; border: 3px solid #43a047; }
+  .fb-sbaglio { background: #ffe2e2; border: 3px solid #e53935; }
+  .fb-tit { font-weight: bold; font-size: 1.2rem; margin-bottom: 6px; }
+  .fb-retry { margin-top: 8px; font-weight: bold; }
+  .btn-continua {
+    background: #43a047; color: #fff; border: none; border-radius: 999px;
+    padding: 12px 28px; font-size: 1.15rem; font-weight: bold; cursor: pointer;
+    margin-top: 12px; font-family: inherit; box-shadow: 0 5px 0 #2e7031;
+  }
+  .btn { border: none; border-radius: 999px; padding: 12px 24px; font-weight: bold; font-size: 1.08rem; cursor: pointer; color: #fff; font-family: inherit; box-shadow: 0 5px 0 rgba(0,0,0,.18); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0,0,0,.18); }
+  .btn-ctrl { background: #5c6bc0; } .btn-exec { background: #8bc34a; }
+  .btn-vs { background: #ef5350; } .btn-clear { background: #90a4ae; }
+  .btn-codice {
+    background: #2d2350; color: #ffe082; border-radius: 14px; padding: 12px 16px;
+    font-family: "Courier New", monospace; font-size: 1.12rem; line-height: 1.55;
+    overflow-x: auto; white-space: pre-wrap; margin: 8px 0;
+  }
+  .codice b { color: #80e27e; }
+  .codice i { color: #80d8ff; font-style: normal; }
+  .linea-num { display: flex; gap: 2px; margin: 10px 0; overflow-x: auto; padding: 6px 2px; }
+  .num-cell {
+    flex: 1; min-width: 24px; text-align: center; background: #ede7ff; border-radius: 8px;
+    font-weight: bold; position: relative; padding: 30px 0 6px 0; min-height: 30px;
+  }
+  .num-cell .rob { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 1.35rem; line-height: 1.4; }
+  .ciclo-box {
+    background: #f3e8ff; border: 3px solid #ab47bc; border-radius: 14px;
+    padding: 10px 14px; margin: 8px 0; font-family: "Courier New", monospace;
+    font-size: 1.12rem; line-height: 1.5; white-space: pre-wrap;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .chip {
+    border: none; background: #4fc3f7; color: #fff; font-weight: bold;
+    padding: 10px 16px; border-radius: 999px; cursor: pointer; font-family: inherit;
+    font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,.15);
+  }
+  .chip:hover { background: #29b6f6; }
+  .seq { list-style: none; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+  .seq-item {
+    background: #ffe082; border-radius: 12px; padding: 10px 12px; cursor: pointer;
+    font-weight: 600; display: flex; gap: 10px; align-items: center;
+  }
+  .seq-num {
+    background: #ff8f00; color: #fff; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: bold; flex: none;
+    font-size: .95rem;
+  }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .griglia-box { text-align: center; margin: 10px 0; }
+  .griglia { display: inline-block; border: 4px solid #5c6bc0; border-radius: 12px; overflow: hidden; background: #e8f0fe; }
+  .griglia td { width: 52px; height: 52px; text-align: center; font-size: 1.4rem; border: 1px solid #c5cae9; background: #fff; padding: 0; }
+  .griglia td.muro { background: #b0bec5; }
+  .griglia td.orma { background: #fff9c4; }
+  .arrow-btn { font-size: 1.5rem; width: 54px; height: 54px; border: none; border-radius: 14px; cursor: pointer; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.18); }
+  .arrow-btn:hover { filter: brightness(1.1); }
+  .fre-su { background: #66bb6a; } .fre-giu { background: #ef5350; }
+  .fre-si { background: #ffa726; } .fre-de { background: #42a5f5; }
+  .prog-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .prog-ins {
+    background: #7e57c2; color: #fff; padding: 8px 14px; border-radius: 999px;
+    font-weight: bold; cursor: pointer; font-size: 1rem; font-family: inherit; border: none;
+  }
+  .prog-ins:hover { background: #5e35b1; }
+  .prog-ins.err { background: #e53935; cursor: default; }
+  .prog-ins.okg { background: #43a047; cursor: default; }
+  #btn-maiuscolo {
+    position: fixed; right: 14px; bottom: 14px; background: #ffca28; border: 3px solid #fff;
+    border-radius: 999px; padding: 12px 18px; font-weight: bold; cursor: pointer;
+    font-size: 1rem; box-shadow: 0 6px 14px rgba(0,0,0,.3); font-family: inherit; z-index: 9; display: none;
+  }
+  #btn-maiuscolo:hover { background: #ffd54f; }
+  .stars-line { font-size: 2.4rem; text-align: center; letter-spacing: 8px; margin: 14px 0; }
+  .risultato { text-align: center; }
+  .risultato .msg { font-size: 1.3rem; margin: 6px 0 16px; }
+  .titolo-sezione { text-align: center; color: #fff; font-weight: bold; font-size: 1.3rem; margin-bottom: 12px; text-shadow: 0 2px 6px rgba(0,0,0,.2); }
+  .indizio { background: #e3f2fd; border: 2px solid #64b5f6; border-radius: 12px; padding: 10px; margin: 8px 0; font-size: 1.05rem; }
+  @media (max-width: 480px) {
+    .griglia td { width: 44px; height: 44px; font-size: 1.2rem; }
+    .es-card { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🤖 CodeMate 2.0</h1>
+    <div class="sotto">Impara matematica e coding giocando! Funziona offline ✓</div>
+    <span id="contatore-stelle">⭐ 0</span>
+  </header>
+  <div id="app"></div>
+</div>
+<button id="btn-maiuscolo">Aa / MAIUSCOLO</button>
+<script>
+"use strict";
+
+/* ===================== UTILITÀ ===================== */
+function appEl(){ return document.getElementById('app'); }
+function crea(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function rand(n){ return Math.floor(Math.random() * n); }
+function intTra(a, b){ return a + rand(b - a + 1); }
+function unoDi(arr){ return arr[rand(arr.length)]; }
+function mescola(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){ const j = rand(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+function mem(chiave, dif){
+  try { const v = localStorage.getItem(chiave); return v === null ? dif : JSON.parse(v); } catch(e){ return dif; }
+}
+function salva(chiave, val){ try { localStorage.setItem(chiave, JSON.stringify(val)); } catch(e){} }
+function opzioniNum(giusta, dis, extra){
+  const map = new Map();
+  for (const d of dis){ if (typeof d.t === 'number' && d.t >= 0 && d.t !== giusta && !map.has(d.t)) map.set(d.t, d); }
+  for (const v of (extra || [giusta + 1, giusta - 1, giusta + 2])){
+    if (map.size >= 3) break;
+    if (v !== giusta && v >= 0 && !map.has(v)) map.set(v, { t: v, spiega: '«' + v + '» non è il numero giusto: prova a simulare il robot o i calcoli passo passo, un comando alla volta.' });
+  }
+  const opz = [{ t: String(giusta), giusta: true }];
+  mescola(Array.from(map.values()).slice(0, 3)).forEach(d => opz.push({ t: String(d.t), giusta: false, spiega: d.spiega }));
+  return opz;
+}
+
+/* ===================== STATO ===================== */
+const state = {
+  materia: null, classe: null, livello: null,
+  esercizi: [], idx: 0,
+  stelleSessione: 0,
+  stelle: mem('codemate2_stelle', {})
+};
+function chiaveLiv(){ return state.materia + '-' + state.classe + '-' + state.livello; }
+function aggStelle(){
+  const tot = Object.values(state.stelle).reduce((a, b) => a + b, 0);
+  document.getElementById('contatore-stelle').textContent = '⭐ ' + tot;
+}
+function aggMaiuscolo(){
+  const cl = state.classe;
+  const forzato = (cl !== null && cl <= 2);
+  document.body.classList.toggle('tutto-mau', forzato || state.maiuscolo);
+  document.getElementById('btn-maiuscolo').style.display = (cl !== null && cl >= 3) ? 'block' : 'none';
+  document.getElementById('btn-maiuscolo').textContent = state.maiuscolo ? '✔ MAIUSCOLO attivo' : 'Aa / MAIUSCOLO';
+}
+document.getElementById('btn-maiuscolo').onclick = function(){ state.maiuscolo = !state.maiuscolo; aggMaiuscolo(); };
+
+/* ===================== SCHEMI DI MENÙ ===================== */
+function schermoMateria(){
+  aggMaiuscolo(); aggStelle();
+  const app = appEl(); app.innerHTML = '';
+  app.appendChild(crea('div', 'titolo-sezione', '🎯 Con cosa vuoi giocare oggi?'));
+  const card = crea('div', 'card');
+  const grid = crea('div', 'big-grid');
+  const bm = crea('button', 'big-btn bg-mat', '➗ MATEMATICA<small>Robot, cicli, tabelline, variabili</small>');
+  bm.onclick = () => { state.materia = 'mat'; schermoClasse(); };
+  const bc = crea('button', 'big-btn bg-cod', '💻 CODING<small>Algoritmi, griglie, debug, funzioni</small>');
+  bc.onclick = () => { state.materia = 'cod'; schermoClasse(); };
+  grid.appendChild(bm); grid.appendChild(bc);
+  card.appendChild(grid); app.appendChild(card);
+}
+function schermoClasse(){
+  aggMaiuscolo();
+  const app = appEl(); app.innerHTML = '';
+  app.appendChild(crea('div', 'titolo-sezione', '🏫 Che classe frequenti?'));
+  const card = crea('div', 'card');
+  const grid = crea('div', 'big-grid');
+  const nomeCl = { 1: '1ª elementare', 2: '2ª elementare', 3: '3ª elementare', 4: '4ª elementare', 5: '5ª elementare' };
+  const nota = { 1: 'Testo tutto in MAIUSCOLO', 2: 'Testo tutto in MAIUSCOLO', 3: 'Hai il pulsante MAIUSCOLO (BES/DSA)', 4: 'Hai il pulsante MAIUSCOLO (BES/DSA)', 5: 'Hai il pulsante MAIUSCOLO (BES/DSA)' };
+  [1, 2, 3, 4, 5].forEach(n => {
+    const b = crea('button', 'big-btn bg-cl' + n, n + 'ª<small>' + nota[n] + '</small>');
+    b.onclick = () => { state.classe = n; schermoLivello(); };
+    grid.appendChild(b);
+  });
+  card.appendChild(grid); app.appendChild(card);
+  app.appendChild(crea('div', '', '<div class="btn-row"><button class="btn-mini" id="indietro-cl">⬅️ Cambia materia</button></div>'));
+  document.getElementById('indietro-cl').onclick = () => { state.materia = null; schermoMateria(); };
+}
+function schermoLivello(){
+  aggMaiuscolo();
+  const app = appEl(); app.innerHTML = '';
+  const nomiMat = { mat: '➗ Matematica', cod: '💻 Coding' };
+  app.appendChild(crea('div', 'titolo-sezione', nomiMat[state.materia] + ' — ' + state.classe + 'ª classe: scegli il livello'));
+  const card = crea('div', 'card');
+  const grid = crea('div', 'big-grid');
+  [
+    [1, '🌱 Facile', 'Primi passi tranquilli'],
+    [2, '🚀 Medio', 'Un po\' più di sfida'],
+    [3, '🔥 Difficile', 'Massima potenza!']
+  ].forEach(pair => {
+    const [n, nome, desc] = pair;
+    const k = state.materia + '-' + state.classe + '-' + n;
+    const st = state.stelle[k] || 0;
+    const b = crea('button', 'big-btn bg-l' + n, 'Livello ' + n + ' ' + nome + '<small>' + desc + '</small>');
+    const stelleTxt = st > 0 ? ('⭐'.repeat(st) + '☆'.repeat(5 - st)) : '☆☆☆☆☆';
+    b.appendChild(crea('div', 'liv-stelle', stelleTxt));
+    b.onclick = () => { state.livello = n; iniziaLivello(); };
+    grid.appendChild(b);
+  });
+  card.appendChild(grid); app.appendChild(card);
+  app.appendChild(crea('div', '', '<div class="btn-row"><button class="btn-mini" id="indietro-lv">⬅️ Cambia classe</button></div>'));
+  document.getElementById('indietro-lv').onclick = () => { state.classe = null; schermoClasse(); };
+}
+
+/* ===================== MOTORE DEGLI ESERCIZI ===================== */
+function iniziaLivello(){
+  state.esercizi = (state.materia === 'mat' ? genMat : genCod)(state.classe, state.livello);
+  state.idx = 0;
+  state.stelleSessione = 0;
+  aggMaiuscolo();
+  rendiEsercizio();
+}
+function rendiEsercizio(){
+  const app = appEl(); app.innerHTML = '';
+  window.scrollTo(0, 0);
+  const ex = state.esercizi[state.idx];
+  const top = crea('div', 'topbar');
+  top.appendChild(crea('span', null, '✏️ Esercizio ' + (state.idx + 1) + ' di 5'));
+  top.appendChild(crea('span', null, '<span class="ex-stars">⭐ ' + state.stelleSessione + ' / 5</span>'));
+  const casa = crea('button', 'btn-mini', '🏠 Menu');
+  casa.onclick = vaiHome;
+  top.appendChild(casa);
+  app.appendChild(top);
+  const card = crea('div', 'card es-card');
+  app.appendChild(card);
+  REND[ex.tipo](card, ex, fineEsercizio);
+}
+function fineEsercizio(stella){
+  if (stella) state.stelleSessione++;
+  state.idx++;
+  window.scrollTo(0, 0);
+  if (state.idx >= state.esercizi.length) schermoRisultati(); else rendiEsercizio();
+}
+function schermoRisultati(){
+  const k = chiaveLiv();
+  const best = Math.max(state.stelle[k] || 0, state.stelleSessione);
+  state.stelle[k] = best;
+  salva('codemate2_stelle', state.stelle);
+  aggStelle();
+  const app = appEl(); app.innerHTML = '';
+  app.appendChild(crea('div', 'titolo-sezione', '🏁 Livello finito!'));
+  const card = crea('div', 'card risultato');
+  card.appendChild(crea('div', 'stars-line', '⭐'.repeat(state.stelleSessione) + '✩'.repeat(5 - state.stelleSessione)));
+  let msg;
+  if (state.stelleSessione === 5) msg = '🌟 INCREDIBILE! Tutte le stelle! Sei un genio del ' + (state.materia === 'mat' ? 'pensiero logico' : 'coding') + '!';
+  else if (state.stelleSessione >= 3) msg = '🎉 Bravo! Hai conquistato ' + state.stelleSessione + ' stelle su 5. Riprova il livello per farle tutte!';
+  else msg = '💪 Hai conquistato ' + state.stelleSessione + ' stelle su 5. Ogni sbaglio ti ha insegnato qualcosa: riprova e vedrai che stelle!';
+  card.appendChild(crea('div', 'msg', msg));
+  card.appendChild(crea('div', 'indizio', 'In questo livello: ' + state.stelleSessione + ' ⭐ — Totale collezionato fino ad ora: ' + Object.values(state.stelle).reduce((a, b) => a + b, 0) + ' ⭐'));
+  const row = crea('div', 'btn-row');
+  row.style.justifyContent = 'center';
+  const b1 = crea('button', 'btn btn-exec', '🔁 Ricomincia il livello');
+  b1.onclick = iniziaLivello;
+  const b2 = crea('button', 'btn btn-ctrl', '⬅️ Scegli un altro livello');
+  b2.onclick = () => { state.livello = null; schermoLivello(); };
+  const b3 = crea('button', 'btn btn-clear', '🏠 Menu iniziale');
+  b3.onclick = vaiHome;
+  row.appendChild(b1); row.appendChild(b2); row.appendChild(b3);
+  card.appendChild(row);
+  app.appendChild(card);
+}
+function vaiHome(){
+  state.materia = null; state.classe = null; state.livello = null;
+  state.maiuscolo = false;
+  window.scrollTo(0, 0);
+  schermoMateria();
+}
+
+/* ===================== FEEDBACK ===================== */
+function boxFeedback(card){
+  let f = card.querySelector('.feedback');
+  if (!f){ f = crea('div', 'feedback'); card.appendChild(f); }
+  return f;
+}
+function mostraGiusto(card, html, cb){
+  const f = boxFeedback(card);
+  f.innerHTML = '';
+  const b = crea('div', 'fb fb-giusto');
+  b.appendChild(crea('div', 'fb-tit', '✅ Esatto!'));
+  b.appendChild(crea('div', 'fb-msg', html));
+  b.appendChild(crea('div', 'fb-retry', 'La spiegazione resta qui finché non premi il pulsante qui sotto 👇'));
+  const btn = crea('button', 'btn-continua', 'Continua ▶');
+  btn.onclick = cb;
+  b.appendChild(btn);
+  f.appendChild(b);
+  window.scrollTo(0, 0);
+}
+function mostraSbaglio(card, html){
+  const f = boxFeedback(card);
+  f.innerHTML = '';
+  const b = crea('div', 'fb fb-sbaglio');
+  b.appendChild(crea('div', 'fb-tit', '❌ Non proprio…'));
+  b.appendChild(crea('div', 'fb-msg', html));
+  b.appendChild(crea('div', 'fb-retry', '🔄 Ora riprova con più attenzione!'));
+  f.appendChild(b);
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+
+
+/* ===================== OGGETTI VISIVI COMUNI ===================== */
+function cmdTesto(m){ return m > 0 ? ('AVANTI ' + m) : ('INDIETRO ' + (-m)); }
+function lineaNumerica(start, max){
+  let celle = '';
+  for (let i = 0; i <= max; i++){
+    celle += '<div class="num-cell">' + (i === start ? '<span class="rob">🤖</span>' : '') + i + '</div>';
+  }
+  return '<div class="linea-num">' + celle + '</div>';
+}
+function bloccoCodice(html){ return '<div class="btn-codice">' + html + '</div>'; }
+function bloccoCiclo(n, corpo){
+  return '<div class="ciclo-box">RIPETI <b>' + n + '</b> VOLTE {\n  ' + corpo.join('\n  ') + '\n}</div>';
+}
+function elencoStep(pos, etichette){
+  return pos.map((p, i) => (i === 0 ? 'parte su ' + pos[0] : etichette[i - 1] + ' → su ' + p)).join('; ');
+}
+
+/* ===================== GENERATORI: MATEMATICA ===================== */
+function genMat(classe, livello){
+  return [genMat1, genMat2, genMat3, genMat4, genMat5][classe - 1](livello);
+}
+
+/* --- Classe 1: robot sulla linea dei numeri --- */
+function genMat1(liv){
+  const out = [];
+  while (out.length < 5){
+    let start, mosse, max;
+    if (liv === 1){ start = rand(5); mosse = []; const nm = 2 + rand(2); for (let i = 0; i < nm; i++) mosse.push(rand(2) ? 1 : -1); max = 10; }
+    else if (liv === 2){ start = rand(7); mosse = []; for (let i = 0; i < 3; i++) mosse.push(rand(2) ? 1 : -1); max = 12; }
+    else { start = rand(5); mosse = []; for (let i = 0; i < 3; i++) mosse.push(rand(2) ? 2 : -2); max = 20; }
+    let p = start, dentro = true; const pos = [start];
+    for (const m of mosse){ p += m; if (p < 0 || p > max) dentro = false; pos.push(p); }
+    if (!dentro || pos.every(x => x === start)) continue;
+    const fine = pos[pos.length - 1];
+    const comandi = mosse.map(cmdTesto).join(', ');
+    const dis = [];
+    mosse.forEach(m => {
+      const v1 = fine - m;
+      if (v1 >= 0 && v1 !== fine) dis.push({ t: v1, spiega: '«' + v1 + '» è dove si fermerebbe il robot se ignorasse «' + cmdTesto(m) + '». Attenzione: ogni comando va eseguito, uno dopo l\u2019altro!' });
+      const v2 = fine - 2 * m;
+      if (v2 >= 0 && v2 !== fine) dis.push({ t: v2, spiega: '«' + v2 + '» si ottiene al contrario: serve andare ' + (m > 0 ? 'AVANTI (verso i numeri più grandi)' : 'INDIETRO (verso i numeri più piccoli)') + ', non nella direzione opposta!' });
+    });
+    const opz = opzioniNum(fine, dis, [fine + 1, fine - 1, fine + 2, Math.abs(start - 1)]);
+    const passiTesto = mosse.map((m, i) => 'dopo «' + cmdTesto(m) + '» il robot è su ' + pos[i + 1]).join('; ');
+    out.push({
+      tipo: 'quiz',
+      testa: lineaNumerica(start, max),
+      domanda: 'Il robot parte da ' + start + ' ed esegue i comandi: ' + comandi + '. Su che numero si ferma?',
+      opzioni: opz,
+      spiegaGiusta: 'Partendo da ' + start + ': ' + passiTesto + '. Il robot si ferma proprio su ' + fine + '! 🤖'
+    });
+  }
+  return out;
+}
+
+/* --- Classe 2: cicli "ripeti N volte" --- */
+function genMat2(liv){
+  const out = [];
+  let guardia = 0;
+  while (out.length < 5 && guardia < 500){
+    guardia++;
+    let start, n, corpo, net, max;
+    if (liv === 1){ start = rand(4); n = 2 + rand(3); corpo = ['AVANTI 1']; net = 1; max = 12; }
+    else if (liv === 2){
+      start = 3 + rand(7);
+      net = rand(2) ? 1 : -1;
+      if (net < 0 && start < 4) start = 6;
+      n = 2 + rand(3); corpo = [net > 0 ? 'AVANTI 1' : 'INDIETRO 1']; max = 15;
+    } else {
+      const variante = rand(2);
+      if (variante === 0){ start = rand(4); n = 3 + rand(3); corpo = ['AVANTI 2']; net = 2; max = 20; }
+      else { start = 5 + rand(6); n = 3 + rand(3); corpo = ['AVANTI 2', 'INDIETRO 1']; net = 1; max = 18; }
+    }
+    const fine = start + net * n;
+    if (fine < 0 || fine > max) continue;
+    const pos = [start];
+    for (let i = 1; i <= n; i++) pos.push(start + net * i);
+    const dis = [
+      { t: fine + net, spiega: '«' + (fine + net) + '» è un giro in più: il ciclo fa esattamente ' + n + ' giri, non ' + (n + 1) + '.' },
+      { t: fine - net, spiega: '«' + (fine - net) + '» è un giro in meno: il ciclo fa ' + n + ' giri, quindi il corpo viene eseguito ' + n + ' volte.' },
+      { t: start + net, spiega: '«' + (start + net) + '» è solo UN giro: il corpo del ciclo va ripetuto ' + n + ' volte!' },
+      { t: start - n * net, spiega: '«' + Math.max(0, start - n * net) + '» si arriva eseguendo i comandi nella direzione sbagliata. Guarda bene la parola dopo «RIPETI ' + n + ' VOLTE»!' }
+    ];
+    if (corpo.length > 1){
+      dis.push({ t: start + (corpo[0].endsWith('2') ? 2 : -2) * n, spiega: 'hai considerato solo «' + corpo[0] + '»: dentro il clico c\u2019è anche «' + corpo[1] + '», che a ogni giro fa tornare il robot di un passo.' });
+    }
+    const opz = opzioniNum(fine, dis, [fine + 2, fine - 2, Math.abs(fine + 3)]);
+    out.push({
+      tipo: 'quiz',
+      testa: lineaNumerica(start, max) + bloccoCiclo(n, corpo),
+      domanda: 'Il robot parte da ' + start + '. Su che numero si ferma dopo il ciclo?',
+      opzioni: opz,
+      spiegaGiusta: 'Il ciclo ripete il suo corpo ' + n + ' volte: il robot percorre ' + pos.map(String).join(' → ') + '. Si ferma su ' + fine + '! 🔄'
+    });
+  }
+  return out;
+}
+
+/* --- Classe 3: tabelline come cicli di somme --- */
+function genMat3(liv){
+  const out = [];
+  const kindPlan = liv === 1 ? ['produci', 'forma', 'produci', 'forma', 'produci']
+                 : liv === 2 ? ['produci', 'forma', 'ciclo', 'produci', 'ciclo']
+                 : ['ciclo', 'produci', 'forma', 'ciclo', 'produci'];
+  for (const kind of kindPlan){
+    if (kind === 'produci'){
+      const a = liv === 1 ? intTra(2, 5) : liv === 2 ? intTra(2, 9) : intTra(6, 12);
+      const k = liv === 1 ? intTra(2, 4) : (liv === 2 ? intTra(3, 6) : intTra(4, 8));
+      const tot = a * k;
+      const somma = Array(k).fill(a).join(' + ');
+      const dis = [
+        { t: tot + a, spiega: '«' + (tot + a) + '» è un gruppo da ' + a + ' in più: contali, i gruppi sono ' + k + '.' },
+        { t: tot - a, spiega: '«' + (tot - a) + '» è un gruppo da ' + a + ' in meno: i gruppi da sommare sono ' + k + '.' },
+        { t: a + k, spiega: '«' + (a + k) + '» è la somma dei due numeri. Qui invece devi sommare ' + k + ' numeri uguali, tutti pari a ' + a + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: '',
+        domanda: 'Quanto fa ' + somma + ' ?',
+        opzioni: opzioniNum(tot, dis, [tot + 1, tot - 2]),
+        spiegaGiusta: 'Sono ' + k + ' gruppi da ' + a + ': ' + k + ' × ' + a + ' = ' + tot + '. La moltiplicazione è esattamente una somma ripetuta! ✖️'
+      });
+    } else if (kind === 'forma'){
+      const a = intTra(2, liv === 1 ? 5 : 9);
+      const k = intTra(3, liv === 1 ? 4 : 6);
+      const giustaTxt = Array(k).fill(a).join(' + ');
+      const kc = Math.max(2, k - 1);
+      const kx = Math.min(k + 1, 8);
+      const dis = [
+        { t: a + ' + ' + k, spiega: '«' + a + ' + ' + k + '» vale ' + (a + k) + ': è una semplice somma. ' + k + ' × ' + a + ' significa invece «' + a + ' ripetuto ' + k + ' volte».' },
+        { t: Array(kc).fill(a).join(' + '), spiega: 'In quella somma i gruppi da ' + a + ' sono solo ' + kc + ': ne manca uno! Devono essere ' + k + '.' },
+        { t: Array(kx).fill(a).join(' + '), spiega: 'Là i gruppi da ' + a + ' sono troppi: ' + kx + ' invece di ' + k + '.' },
+        { t: Array(k).fill(a).join(' − '), spiega: 'Con i meno è una sottrazione ripetuta: le tabelline sono somme ripetute, con il segno +!' }
+      ];
+      const visti = new Set([giustaTxt]);
+      const opzF = [];
+      mescola(dis).forEach(d => { if (!visti.has(d.t) && opzF.length < 3){ visti.add(d.t); opzF.push({ t: d.t, giusta: false, spiega: d.spiega }); } });
+      out.push({
+        tipo: 'quiz',
+        testa: '',
+        domanda: 'Quale somma corrisponde a ' + k + ' × ' + a + ' ?',
+        opzioni: [{ t: giustaTxt, giusta: true }].concat(opzF),
+        spiegaGiusta: k + ' × ' + a + ' vuol dire ' + k + ' gruppi da ' + a + ': ' + giustaTxt + ' = ' + (k * a) + '.'
+      });
+    } else {
+      const a = intTra(2, liv === 3 ? 9 : 6);
+      const k = intTra(3, liv === 3 ? 7 : 5);
+      const tot = a * k;
+      const seq = [0]; for (let i = 1; i <= k; i++) seq.push(a * i);
+      const dis = [
+        { t: a, spiega: '«' + a + '» è un solo giro del ciclo: ma i giri sono ' + k + '!' },
+        { t: k, spiega: '«' + k + '» è il numero dei giri: a ogni giro però si aggiunge ' + a + ' al contatore.' },
+        { t: a + k, spiega: '«' + (a + k) + '» confonde i giri con il numero aggiunto: si aggiunge ' + a + ' per ' + k + ' volte.' },
+        { t: tot + a, spiega: '«' + (tot + a) + '» è un giro in più: i giri del ciclo sono ' + k + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('cont = <b>0</b>\n<b>RIPETI</b> ' + k + ' VOLTE {\n  cont = cont + <b>' + a + '</b>\n}'),
+        domanda: 'Quanto vale cont alla fine del programma?',
+        opzioni: opzioniNum(tot, dis, [tot - 1, tot + 2]),
+        spiegaGiusta: 'Il contatore parte da 0 e a ogni giro si aggiunge ' + a + ': ' + seq.join(' → ') + '. Quindi cont = ' + tot + ', ed è come calcolare ' + k + ' × ' + a + '.'
+      });
+    }
+  }
+  return out;
+}
+
+/* --- Classe 4: variabili passo-passo --- */
+function genMat4(liv){
+  const out = [];
+  const kindPlan = liv === 1 ? ['una', 'una', 'una', 'una', 'una']
+                 : liv === 2 ? ['una', 'due', 'una', 'due', 'scambio']
+                             : ['molti', 'due', 'scambio', 'molti', 'due'];
+  for (const kind of kindPlan){
+    if (kind === 'una'){
+      const a0 = intTra(2, 9);
+      const s = intTra(1, 6);
+      const op = (liv === 2 || rand(2)) ? '+' : '-';
+      const fine = op === '+' ? a0 + s : (a0 - s >= 0 ? a0 - s : a0 + s);
+      const opEff = fine === a0 + s ? '+' : '-';
+      const dis = [
+        { t: a0, spiega: '«' + a0 + '» è il vecchio valore: ma con «a = a ' + opEff + ' ' + s + '» la variabile a viene aggiornata! Nuovo valore = valore di prima ' + opEff + ' ' + s + '.' },
+        { t: s, spiega: '«' + s + '» è solo il numero scritto nella riga. Il nuovo valore di a si calcola partendo dal vecchio (' + a0 + ').' },
+      ];
+      if (opEff === '+') dis.push({ t: a0 + 2 * s, spiega: '«' + (a0 + 2 * s) + '» è come se aggiungessi ' + s + ' due volte: la riga «a = a + ' + s + '» aggiunge una volta sola.' });
+      else dis.push({ t: a0 + s, spiega: '«' + (a0 + s) + '» viene da una addizione: ma il comando dice a = a − ' + s + ', quindi bisogna TOGLIERE ' + s + '.' });
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('a = <b>' + a0 + '</b>\na = a ' + opEff + ' <b>' + s + '</b>'),
+        domanda: 'Quanto vale a alla fine del programma?',
+        opzioni: opzioniNum(fine, dis, [fine + 1, fine - 1]),
+        spiegaGiusta: 'a parte da ' + a0 + '. La riga «a = a ' + opEff + ' ' + s + '» usa il valore di prima: ' + a0 + ' ' + opEff + ' ' + s + ' = ' + fine + '. Ora a vale ' + fine + '.'
+      });
+    } else if (kind === 'due'){
+      const a0 = intTra(2, 9), b0 = intTra(1, 6);
+      const b1 = b0 + a0;
+      const q = intTra(1, 4);
+      const a1 = b1 - q;
+      const dis = [
+        { t: b1, spiega: '«' + b1 + '» è il valore di b, non di a! Della domanda chiede il valore di a sulla terza riga del programma.' },
+        { t: a0, spiega: '«' + a0 + '» è il valore iniziale di a: però a cambia nell\u2019ultima riga, quando riceve b − ' + q + '.' },
+        { t: b1 + q, spiega: '«' + (b1 + q) + '» viene da un errore di segno: l\u2019ultima riga dice a = b − ' + q + ', quindi bisogna togliere ' + q + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('a = <b>' + a0 + '</b>\nb = <b>' + b0 + '</b>\nb = b + a\na = b − <b>' + q + '</b>'),
+        domanda: 'Quanto vale a alla fine del programma?',
+        opzioni: opzioniNum(a1, dis, [a1 + 1, a1 - 1]),
+        spiegaGiusta: 'Passo-passo: a = ' + a0 + ', b = ' + b0 + '. La riga «b = b + a» → b = ' + b0 + ' + ' + a0 + ' = ' + b1 + '. La riga «a = b − ' + q + '» → a = ' + b1 + ' − ' + q + ' = ' + a1 + '. Each valore nuovo usa i valori aggiornati!'
+      });
+    } else if (kind === 'scambio'){
+      const a0 = intTra(3, 9), b0 = intTra(10, 19);
+      const dis = [
+        { t: a0 + ' e ' + b0, spiega: 'Quel sono i valori iniziali: per\u00f2 «a = b» copia in a il valore di b, e poi «b = x» mette in b il vecchio valore di a. I valori si scambiano!' },
+        { t: b0 + ' e ' + b0, spiega: 'a diventa ' + b0 + ', ma POI b = x: e x contiene il vecchio valore di a (' + a0 + '), salvato apposta prima dello scambio.' },
+        { t: a0 + ' e ' + a0, spiega: 'b non diventa uguale ad a: b riceve x, che era la copia del vecchio valore di a (' + a0 + ')... e a riceve il vecchio valore di b (' + b0 + ').' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('a = <b>' + a0 + '</b>\nb = <b>' + b0 + '</b>\nx = a\na = b\nb = x'),
+        domanda: 'Quanto valgono a e b alla fine? (scrivi: valore di a e valore di b)',
+        opzioni: [{ t: b0 + ' e ' + a0, giusta: true }].concat(mescola(dis).slice(0, 3).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+        spiegaGiusta: 'x serve da scatola d\u2019appoggio: x = ' + a0 + '. Poi a = ' + b0 + ', infine b = ' + a0 + '. I due valori si sono scambiati di posto! 🔁'
+      });
+    } else {
+      const a0 = intTra(2, 6), m = intTra(2, 4), s = intTra(2, 9);
+      const v1 = a0 * m, v2 = v1 + s;
+      const dividi = v2 % 2 === 0;
+      const fine = dividi ? v2 / 2 : v2 - 1;
+      const rigaFondo = dividi ? 'a = a ÷ <b>2</b>' : 'a = a − <b>1</b>';
+      const dis = [
+        { t: a0, spiega: '«' + a0 + '» è il punto di partenza: però ogni riga aggiorna a, una dopo l\'altra.' },
+        { t: v1, spiega: '«' + v1 + '» è il valore dopo la prima riga: ma il programma continua con le righe successive!' },
+        { t: v2, spiega: '«' + v2 + '» è quasi ok: manca solo l\'ultima riga del programma, eseguila pure.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('a = <b>' + a0 + '</b>\na = a × <b>' + m + '</b>\na = a + <b>' + s + '</b>\n' + rigaFondo),
+        domanda: 'Quanto vale a alla fine del programma?',
+        opzioni: opzioniNum(fine, dis, [fine + 2, fine - 2, fine + 1]),
+        spiegaGiusta: 'A ogni riga a cambia: ' + a0 + ' → × ' + m + ' = ' + v1 + ' → + ' + s + ' = ' + v2 + (dividi ? ' → ÷ 2' : ' → − 1') + ' = ' + fine + '. Alla fine a vale ' + fine + '!'
+      });
+    }
+  }
+  return out;
+}
+
+
+/* --- Classe 5: condizioni se/allora (+ funzioni) --- */
+function genMat5(liv){
+  const out = [];
+  const coppieParole = [['GRANDE', 'PICCOLO'], ['ALTO', 'BASSO'], ['ACCESA', 'SPENTA'], ['MATURO', 'ANCORA VERDE']];
+  const opVero = { '>': 'è maggiore di', '<': 'è minore di', '==': 'è uguale a' };
+  const opDesc = { '>': 'non è maggiore di', '<': 'non è minore di', '==': 'non è uguale a' };
+  function esSe(){
+    const n = intTra(1, 10), soglia = intTra(3, 8);
+    const op = unoDi(['>', '<', '==']);
+    const condVera = op === '>' ? n > soglia : (op === '<' ? n < soglia : n === soglia);
+    const parole = unoDi(coppieParole);
+    const opz = [
+      { t: parole[0], giusta: condVera, spiega: condVera ? '' : '«' + parole[0] + '» esce solo se n ' + opVero[op] + ' ' + soglia + '. Ma n vale ' + n + ' e ' + n + ' ' + opDesc[op] + ' ' + soglia + ': si esegue il ramo ALTRIMENTI.' },
+      { t: parole[1], giusta: !condVera, spiega: condVera ? '«' + parole[1] + '» esce solo col ramo ALTRIMENTI, cioè quando n ' + opDesc[op] + ' ' + soglia + '. Qui però n = ' + n + ' e ' + n + ' ' + opVero[op] + ' ' + soglia + ': si esegue il ramo SE.' : '' },
+      { t: 'non stampa niente', giusta: false, spiega: 'Il SE ha sempre un ramo da eseguire: se la condizione è vera fa una cosa, se è falsa fa quella dell\u2019ALTRIMENTI. Stampa sempre una parola!' }
+    ];
+    out.push({
+      tipo: 'quiz',
+      testa: bloccoCodice('n = <b>' + n + '</b>\n<b>SE</b> n ' + op + ' <b>' + soglia + '</b> ALLORA\n  stampa "' + parole[0] + '"\n<b>ALTRIMENTI</b>\n  stampa "' + parole[1] + '"'),
+      domanda: 'Che cosa stampa il programma?',
+      opzioni: mescola(opz),
+      spiegaGiusta: 'n vale ' + n + ' e ' + n + (condVera ? ' ' + opVero[op] + ' ' + soglia : ' ' + opDesc[op] + ' ' + soglia) + ': il programma esegue il ramo ' + (condVera ? 'SE e stampa «' + parole[0] + '»' : 'ALTRIMENTI e stampa «' + parole[1] + '»') + '.'
+    });
+  }
+  function esSeCont(){
+    const k = intTra(2, 4), s = intTra(1, 3);
+    const cont = k * s;
+    const uguale = rand(2) === 0;
+    const soglia = uguale ? cont : cont + intTra(1, 3);
+    const parole = unoDi(coppieParole);
+    const opz = [
+      { t: uguale ? parole[0] : parole[1], giusta: true },
+      { t: uguale ? parole[1] : parole[0], giusta: false, spiega: '«' + (uguale ? parole[1] : parole[0]) + '» esce solo ' + (uguale ? 'quando cont NON vale ' : 'quando cont vale esattamente ') + soglia + '. Ma cont vale ' + cont + ', perché i ' + k + ' giri aggiungono ' + s + ' ciascuno.' },
+      { t: 'non stampa niente', giusta: false, spiega: 'Il SE esegue sempre uno dei due rami: se la condizione è vera il primo, se è falsa l\u2019ALTRIMENTI. Il programma stampa sempre una parola.' }
+    ];
+    out.push({
+      tipo: 'quiz',
+      testa: bloccoCodice('cont = <b>0</b>\n<b>RIPETI</b> ' + k + ' VOLTE {\n  cont = cont + <b>' + s + '</b>\n}\n<b>SE</b> cont == <b>' + soglia + '</b> ALLORA\n  stampa "' + parole[0] + '"\n<b>ALTRIMENTI</b>\n  stampa "' + parole[1] + '"'),
+      domanda: 'Che cosa stampa il programma?',
+      opzioni: mescola(opz),
+      spiegaGiusta: 'Contiamo i giri: cont parte da 0 e dopo ' + k + ' giri di +' + s + ' vale ' + cont + '. La condizione cont == ' + soglia + ' è ' + (uguale ? 'VERA → si stampa «' + parole[0] + '»' : 'FALSA (cont vale ' + cont + ') → si esegue l\u2019ALTRIMENTI e si stampa «' + parole[1] + '»') + '.'
+    });
+  }
+  function esFunzCond(){
+    const v = intTra(2, 9);
+    const n = v * 2;
+    const soglia = intTra(5, 18);
+    const condVera = n > soglia;
+    const parole = unoDi(coppieParole);
+    const dis = [
+      { t: condVera ? parole[1] : parole[0], spiega: 'Prima calcola la funzione: doppio(' + v + ') = ' + v + ' × 2 = ' + n + '. Poi la condizione: ' + n + (condVera ? ' è maggiore di ' + soglia : ' NON è maggiore di ' + soglia) + ', quindi si esegue il ramo ' + (condVera ? 'SE («' + parole[0] + '»)' : 'ALTRIMENTI («' + parole[1] + '»)') + '.' },
+      { t: 'non stampa niente', spiega: 'RESTITUISCI dà alla variabile n il valore ' + n + ', poi il SE ha sempre un ramo da eseguire: il programma stampa sempre una parola.' }
+    ];
+    out.push({
+      tipo: 'quiz',
+      testa: bloccoCodice('<b>FUNZIONE</b> doppio(x) {\n  <b>RESTITUISCI</b> x × 2\n}\nn = doppio(<b>' + v + '</b>)\n<b>SE</b> n > <b>' + soglia + '</b> ALLORA\n  stampa "' + parole[0] + '"\n<b>ALTRIMENTI</b>\n  stampa "' + parole[1] + '"'),
+      domanda: 'Che cosa stampa il programma?',
+      opzioni: [{ t: condVera ? parole[0] : parole[1], giusta: true }].concat(mescola(dis).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+      spiegaGiusta: 'La funzione doppio(' + v + ') restituisce ' + v + ' × 2 = ' + n + '. Poi ' + n + (condVera ? ' > ' + soglia + ' è VERO → si stampa «' + parole[0] + '»' : ' > ' + soglia + ' è FALSO → si esegue l\u2019ALTRIMENTI: si stampa «' + parole[1] + '»') + '.'
+    });
+  }
+  function esFunzTesto(){
+    const nome = unoDi(['Anna', 'Luca', 'Sofia', 'Marco', 'Giulia']);
+    const parola1 = unoDi(['Ciao ', 'Buongiorno ', 'Ehilà ']);
+    const giusto = parola1 + nome;
+    const dis = [
+      { t: parola1 + 'nome', spiega: 'Dentro la funzione «nome» è il PARAMETRO: quando chiami saluto("' + nome + '"), il parametro nome vale "' + nome + '". Non si stampa la parola «nome»!' },
+      { t: nome + ' ' + parola1.trim(), spiega: 'L\u2019ordine è invertito: la funzione mette prima «' + parola1.trim() + '» e poi attacca il nome: ' + parola1 + ' + "' + nome + '".' },
+      { t: parola1.trim(), spiega: 'Manca il nome: la funzione RESTITUISCE «' + parola1 + '» + nome, cioè le due parti attaccate (concatenate).' },
+      { t: giusto.replace(' ', '_'), spiega: 'Lo spazio: la funzione contiene «' + parola1 + '» CON lo spazio in fondo, poi attacca il nome. Le stringhe si attaccano così com\u2019è.' }
+    ];
+    out.push({
+      tipo: 'quiz',
+      testa: bloccoCodice('<b>FUNZIONE</b> saluto(nome) {\n  <b>RESTITUISCI</b> "' + parola1 + '" + nome\n}\nstampa(saluto("' + nome + '"))'),
+      domanda: 'Che cosa stampa il programma?',
+      opzioni: [{ t: giusto, giusta: true }].concat(mescola(dis).slice(0, 3).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+      spiegaGiusta: 'Chiamando saluto("' + nome + '") il parametro nome vale "' + nome + '", e la funzione restituisce "' + parola1 + '" + "' + nome + '" = "' + giusto + '". Le due stringhe si attaccano (concatenano)! 🧩'
+    });
+  }
+  if (liv === 1){ esSe(); esSe(); esSe(); esSe(); esSe(); }
+  else if (liv === 2){ esSeCont(); esSe(); esSeCont(); esSe(); esSeCont(); }
+  else { esFunzCond(); esFunzTesto(); esFunzCond(); esFunzTesto(); esFunzCond(); }
+  return out;
+}
+
+/* ===================== GRIGLIA: OGGETTI E SIMULAZIONE ===================== */
+const FRECCE = {
+  SU: { em: '⬆️', d: [-1, 0] },
+  GIU: { em: '⬇️', d: [1, 0] },
+  SINISTRA: { em: '⬅️', d: [0, -1] },
+  DESTRA: { em: '➡️', d: [0, 1] }
+};
+function simulaGriglia(ex, prog){
+  let r = ex.r, c = ex.c;
+  const passi = [[r, c]];
+  for (let i = 0; i < prog.length; i++){
+    const d = FRECCE[prog[i]].d;
+    const nr = r + d[0], nc = c + d[1];
+    if (nr < 0 || nr >= ex.n || nc < 0 || nc >= ex.n) return { ok: false, crash: i + 1, crashMotivo: 'bordo', passi, r, c };
+    if (ex.muri.some(w => w[0] === nr && w[1] === nc)) return { ok: false, crash: i + 1, crashMotivo: 'muro', passi, r, c };
+    r = nr; c = nc;
+    passi.push([r, c]);
+  }
+  return { ok: r === ex.tr && c === ex.tc, passi, r, c };
+}
+function bfsCammino(n, muri, da, a){
+  const q = [da], visto = new Set([da[0] + ',' + da[1]]);
+  while (q.length){
+    const cur = q.shift();
+    if (cur[0] === a[0] && cur[1] === a[1]) return true;
+    for (const k in FRECCE){
+      const nr = cur[0] + FRECCE[k].d[0], nc2 = cur[1] + FRECCE[k].d[1];
+      const kk = nr + ',' + nc2;
+      if (nr < 0 || nr >= n || nc2 < 0 || nc2 >= n) continue;
+      if (visto.has(kk) || muri.some(w => w[0] === nr && w[1] === nc2)) continue;
+      visto.add(kk); q.push([nr, nc2]);
+    }
+  }
+  return false;
+}
+
+/* ===================== GENERATORI: CODING ===================== */
+function genCod(classe, livello){
+  return [genCod1, genCod2, genCod3, genCod4, genCod5][classe - 1](livello);
+}
+
+const SCENARI = [
+  {
+    titolo: '🥪 Fare un panino',
+    passi: [
+      { t: 'Prendi due fette di pane', why: 'per fare un panino serve prima il pane' },
+      { t: 'Metti il ripieno su una fetta', why: 'per mettere il ripieno devi prima avere le fette di pane davanti' },
+      { t: 'Chiudi il panino con l\u2019altra fetta', why: 'per chiudere il panino serve prima aver messo il ripieno' },
+      { t: 'Taglia il panino a metà', why: 'per tagliarlo bene il panino deve essere già chiuso' },
+      { t: 'Metti il panino nel piatto', why: 'il panino va nel piatto quando è pronto, dopo averlo tagliato' },
+      { t: 'Mangia il panino con gusto!', why: 'prima di mangiare serve il panino pronto nel piatto' }
+    ]
+  },
+  {
+    titolo: '🪥 Lavarsi i denti',
+    passi: [
+      { t: 'Prendi lo spazzolino', why: 'per lavarsi i denti serve prima lo spazzolino' },
+      { t: 'Metti il dentifricio sullo spazzolino', why: 'per mettere il dentifricio devi prima avere lo spazzolino in mano' },
+      { t: 'Lavati i denti per 2 minuti', why: 'per lavarti i denti devi prima avere spazzolino e dentifricio pronti' },
+      { t: 'Sciacqua la bocca', why: 'ci si sciacqua solo dopo aver lavato i denti' },
+      { t: 'Risciacqua lo spazzolino', why: 'lo spazzolino si pulisce dopo che ti sei lavato i denti' },
+      { t: 'Rimetti lo spazzolino al suo posto', why: 'si rimette a posto solo quando hai finito tutto' }
+    ]
+  },
+  {
+    titolo: '🌱 Seminare un seme',
+    passi: [
+      { t: 'Prendi un vaso', why: 'per seminare serve prima il vaso' },
+      { t: 'Riempi il vaso di terra', why: 'per riempirlo di terra devi prima avere il vaso' },
+      { t: 'Fai un buchino nella terra', why: 'il buchino si fa quando il vaso è già pieno di terra' },
+      { t: 'Metti il seme nel buchino', why: 'il seme va dentro il buchino, quindi prima serve aver fatto il buchino' },
+      { t: 'Copri il seme con un po\u2019 di terra', why: 'si copre il seme solo dopo averlo messo nella terra' },
+      { t: 'Annaffia tutto con delicatezza', why: 'l\u2019acqua si dà alla fine, quando il seme è già seminato' }
+    ]
+  },
+  {
+    titolo: '🎨 Preparare un disegno regalo',
+    passi: [
+      { t: 'Prendi un foglio', why: 'per fare il disegno serve prima il foglio' },
+      { t: 'Prendi le matite colorate', why: 'prima delle matite devi avere il foglio già pronto sul tavolo' },
+      { t: 'Disegna la tua figura preferita', why: 'si disegna solo quando hai già foglio e matite' },
+      { t: 'Colora il disegno', why: 'si colora dopo aver finito di disegnare i contorni' },
+      { t: 'Scrivi il tuo nome in fondo', why: 'il nome si firma alla fine, sul disegno finito' },
+      { t: 'Metti il disegno nella busta', why: 'si mette in busta solo quando il disegno è completo' }
+    ]
+  },
+  {
+    titolo: '🎒 Preparare lo zaino',
+    passi: [
+      { t: 'Prendi lo zaino', why: 'per preparare lo zaino serve prima lo zaino' },
+      { t: 'Guarda l\u2019orario di domani', why: 'prima di mettere i libri devi sapere quali servono domani' },
+      { t: 'Metti i libri del giorno', why: 'i libri si mettono dopo aver guardato l\u2019orario' },
+      { t: 'Metti i quaderni', why: 'nell\u2019ordine giusto si mettono prima i libri e poi i quaderni' },
+      { t: 'Aggiungi la bottiglia d\u2019acqua', why: 'la bottiglia si mette quando libri e quaderni sono già dentro' },
+      { t: 'Chiudi lo zaino', why: 'si chiude lo zaino solo quando dentro c\u2019è tutto' }
+    ]
+  },
+  {
+    titolo: '🐕 Dar da mangiare al cane',
+    passi: [
+      { t: 'Prendi la ciotola', why: 'per dare il cibo al cane serve prima la ciotola' },
+      { t: 'Versa le crocchette nella ciotola', why: 'le crocchette si versano nella ciotola, che devi avere già preso' },
+      { t: 'Aggiungi un po\u2019 d\u2019acqua fresca', why: 'l\u2019acqua si aggiunge dopo le crocchette' },
+      { t: 'Metti la ciotola a terra', why: 'la ciotola si mette a terra quando è già piena' },
+      { t: 'Chiama il cane', why: 'il cane si chiama dopo che il suo pasto è pronto' },
+      { t: 'Lava la ciotola quando ha finito', why: 'la ciotola si lava solo dopo che il cane ha mangiato' }
+    ]
+  }
+];
+
+/* --- Classe 1: ordinare algoritmi quotidiani --- */
+function genCod1(liv){
+  const out = [];
+  const scen = mescola(SCENARI).slice(0, 5);
+  scen.forEach(sc => {
+    const npassi = liv === 1 ? 4 : (liv === 2 ? 5 : 6);
+    const passi = sc.passi.slice(0, npassi);
+    out.push({
+      tipo: 'ordina',
+      titolo: sc.titolo,
+      passi: passi,
+      spiegaGiusta: 'L\u2019algoritmo di «' + sc.titolo.slice(2).trim() + '» è corretto: \n' + passi.map((p, i) => (i + 1) + ') ' + p.t).join('\n') + '\nOgni passo prepara quello dopo: questo è un algoritmo! 🎯'
+    });
+  });
+  return out;
+}
+
+/* --- Classe 2: comprimere in cicli e contare istruzioni --- */
+function genCod2(liv){
+  const out = [];
+  const arrowWords = ['AVANTI', 'GIU', 'SU', 'DESTRA', 'SINISTRA', 'CLAC'];
+  const kindPlan = liv === 1 ? ['A', 'C', 'A', 'C', 'A']
+                 : (liv === 2 ? ['A', 'B', 'C', 'A', 'B']
+                             : ['D', 'B', 'C', 'D', 'B']);
+  for (const kind of kindPlan){
+    if (kind === 'A'){
+      const ins = unoDi(arrowWords);
+      const k = liv === 1 ? intTra(3, 4) : intTra(4, 6);
+      const alt = unoDi(arrowWords.filter(g => g !== ins));
+      const righe = Array(k).fill(ins).join('\n');
+      const dis = [
+        { t: 'RIPETI ' + (k + 1) + ' VOLTE { ' + ins + ' }', spiega: 'Con ' + (k + 1) + ' giri l\u2019istruzione si esegue ' + (k + 1) + ' volte: una in più del programma! Conta le righe: sono ' + k + '.' },
+        { t: 'RIPETI ' + (k - 1) + ' VOLTE { ' + ins + ' }', spiega: 'Con ' + (k - 1) + ' giri si eseguirebbe l\u2019istruzione ' + (k - 1) + ' volte invece di ' + k + ': manca un giro.' },
+        { t: 'RIPETI ' + k + ' VOLTE { ' + alt + ' }', spiega: 'Dentro il ciclo c\u2019è «' + alt + '», un comando diverso: il ciclo deve contenere la STESSA istruzione ripetuta, cioè «' + ins + '».' },
+        { t: ins + ' RIPETUTO ' + k + ' VOLTE SENZA CICLO', spiega: 'Senza RIPETI non è un ciclo: così si riscrivono di nuovo tutte le ' + k + ' righe, e non si comprime niente!' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice(righe),
+        domanda: 'Quale ciclo fa esattamente la stessa cosa, ma con meno righe?',
+        opzioni: [{ t: 'RIPETI ' + k + ' VOLTE { ' + ins + ' }', giusta: true }].concat(mescola(dis).slice(0, 3).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+        spiegaGiusta: 'Le ' + k + ' istruzioni sono tutte uguali («' + ins + '»): si può comprimere tutto in «RIPETI ' + k + ' VOLTE { ' + ins + ' }». Stesso lavoro, una riga sola! 🧲'
+      });
+    } else if (kind === 'B'){
+      const ins = mescola(arrowWords).slice(0, liv === 3 ? 3 : 2);
+      const k = intTra(2, 4);
+      const tot = k * ins.length;
+      const corpo = ins.map(i => '  ' + i).join('\n');
+      const dis = [
+        { t: tot + ins.length, spiega: 'Hai contato un giro in più: i giri del ciclo sono ' + k + ', quindi ' + k + ' × ' + ins.length + ' = ' + tot + '.' },
+        { t: tot - ins.length, spiega: 'Hai contato un giro in meno: i giri sono ' + k + ' e ogni giro aggiunge ' + ins.length + ' istruzioni: ' + k + ' × ' + ins.length + ' = ' + tot + '.' },
+        { t: k, spiega: '«' + k + '» sono solo i GIRI: ma dentro ogni giro ci sono ' + ins.length + ' istruzioni, quindi conta tutte: ' + k + ' × ' + ins.length + ' = ' + tot + '.' },
+        { t: ins.length, spiega: 'Quella è solo una riga del corpo del ciclo: il ciclo la ripete ' + k + ' volte, quindi ' + k + ' × ' + ins.length + ' = ' + tot + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('<b>RIPETI</b> ' + k + ' VOLTE {\n' + corpo + '\n}'),
+        domanda: 'Quante istruzioni in totale esegue il computer?',
+        opzioni: opzioniNum(tot, dis, [tot + 2]),
+        spiegaGiusta: 'Ogni giro esegue ' + ins.length + ' istruzioni, una dopo l\u2019altra. I giri sono ' + k + ': ' + k + ' × ' + ins.length + ' = ' + tot + ' istruzioni in totale! 🧮'
+      });
+    } else if (kind === 'C'){
+      const ins = unoDi(arrowWords);
+      const k = liv === 3 ? intTra(5, 7) : intTra(3, 5);
+      const giustaTxt = Array(k).fill(ins).join(' ');
+      const dis = [
+        { t: Array(k + 1).fill(ins).join(' '), spiega: 'Quella è una ripetizione in più: ' + (k + 1) + ' volte, ma il ciclo dice ' + k + ' VOLTE.' },
+        { t: Array(Math.max(1, k - 1)).fill(ins).join(' '), spiega: 'Quella è una ripetizione in meno: ' + Math.max(1, k - 1) + ' volte, ma il ciclo dice ' + k + ' VOLTE.' },
+        { t: unoDi(arrowWords.filter(g => g !== ins)) + ' ripetuto ' + k + ' volte', spiega: 'L\u2019istruzione è sbagliata: dentro il ciclo c\u2019è «' + ins + '», non un altro comando.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCiclo(k, [ins]),
+        domanda: 'Che lavoro fa questo programma?',
+        opzioni: [{ t: giustaTxt, giusta: true }].concat(mescola(dis).slice(0, 3).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+        spiegaGiusta: 'Il ciclo esegue «' + ins + '» per ' + k + ' volte di fila, quindi: ' + giustaTxt + '. I cicli servono a non riscrivere le stesse istruzioni!'
+      });
+    } else {
+      const est = intTra(2, 3), inn = intTra(2, 4);
+      const ins = 'AVANTI';
+      const tot = est * inn;
+      const dis = [
+        { t: est + inn, spiega: '«' + (est + inn) + '» viene da ' + est + ' + ' + inn + ', ma i cicli annidati si MOLTIPLICANO: per ogni giro di fuori, quello dentro gira ' + inn + ' volte.' },
+        { t: inn, spiega: '«' + inn + '» è un solo giro del ciclo esterno: ma i giri esterni sono ' + est + ', quindi ' + est + ' × ' + inn + ' = ' + tot + '.' },
+        { t: est, spiega: '«' + est + '» è solo il numero dei giri del ciclo esterno: dentro ogni giro, quello interno ripete ancora ' + inn + ' volte.' },
+        { t: tot + inn, spiega: '«' + (tot + inn) + '» è un giro del ciclo interno in più: ' + est + ' × ' + inn + ' = ' + tot + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('<b>RIPETI</b> ' + est + ' VOLTE {\n  <b>RIPETI</b> ' + inn + ' VOLTE {\n    ' + ins + '\n  }\n}'),
+        domanda: 'Quante volte viene eseguita l\u2019istruzione ' + ins + '?',
+        opzioni: opzioniNum(tot, dis, [tot + 1, tot + 2]),
+        spiegaGiusta: 'Cicli annidati: per ognuno dei ' + est + ' giri di fuori, il ciclo interno fa ' + inn + ' giri. Quindi ' + est + ' × ' + inn + ' = ' + tot + ' volte! 🎡'
+      });
+    }
+  }
+  return out;
+}
+
+/* --- Classe 3: robot sulla griglia 5×5 --- */
+function genCod3(liv){
+  const out = [];
+  let guardia = 0;
+  while (out.length < 5 && guardia < 400){
+    guardia++;
+    const dist = liv === 1 ? intTra(2, 3) : (liv === 2 ? intTra(3, 5) : intTra(4, 6));
+    const r = rand(5), c = rand(5);
+    let tr = -1, tc = -1;
+    for (let tent = 0; tent < 100; tent++){
+      const rr = rand(5), cc = rand(5);
+      if (Math.abs(rr - r) + Math.abs(cc - c) === dist){ tr = rr; tc = cc; break; }
+    }
+    if (tr < 0) continue;
+    let muri = [];
+    if (liv === 3){
+      const nm = intTra(2, 3);
+      for (let w = 0; w < nm; w++){
+        for (let t = 0; t < 30; t++){
+          const wr = rand(5), wc = rand(5);
+          const occup = (wr === r && wc === c) || (wr === tr && wc === tc);
+          const doppio = muri.some(m => m[0] === wr && m[1] === wc);
+          if (!occup && !doppio){ muri.push([wr, wc]); break; }
+        }
+      }
+    }
+    if (!bfsCammino(5, muri, [r, c], [tr, tc])) continue;
+    out.push({ tipo: 'griglia', n: 5, r, c, tr, tc, muri, liv });
+  }
+  return out;
+}
+
+/* --- Classe 4: trovare (e correggere) l\u2019unica istruzione sbagliata --- */
+function genCod4(liv){
+  const len = liv === 1 ? 3 : (liv === 2 ? 5 : 7);
+  const out = [];
+  let tentativo = 0;
+  while (out.length < 5 && tentativo < 2000){
+    tentativo++;
+    const r = rand(5), c = rand(5);
+    let dr = 0, dc = 0, tr = -1, tc = -1;
+    for (let t = 0; t < 60; t++){
+      const rr = rand(5), cc = rand(5);
+      const dd = Math.abs(rr - r) + Math.abs(cc - c);
+      if (dd === len){ tr = rr; tc = cc; dr = rr - r; dc = cc - c; break; }
+    }
+    if (tr < 0) continue;
+    const mosse = [];
+    for (let i = 0; i < Math.abs(dr); i++) mosse.push(dr > 0 ? 'GIU' : 'SU');
+    for (let i = 0; i < Math.abs(dc); i++) mosse.push(dc > 0 ? 'DESTRA' : 'SINISTRA');
+    const giusto = mescola(mosse);
+    const iErr = rand(len);
+    const altre = Object.keys(FRECCE).filter(f => f !== giusto[iErr]);
+    const sbagliata = unoDi(altre);
+    const prog = giusto.slice();
+    prog[iErr] = sbagliata;
+    const exTest = { r, c, tr, tc, n: 5, muri: [] };
+    if (simulaGriglia(exTest, prog).ok) continue;
+    let unica = true;
+    for (const f of Object.keys(FRECCE)){
+      if (f === sbagliata) continue;
+      const p2 = prog.slice(); p2[iErr] = f;
+      if (simulaGriglia(exTest, p2).ok){ unica = false; break; }
+    }
+    if (!unica) continue;
+    out.push({ tipo: 'debug', n: 5, r, c, tr, tc, muri: [], prog, erroreIdx: iErr, giusta: giusto[iErr], sbagliata, liv });
+  }
+  while (out.length < 5){
+    const giusto = ['DESTRA', 'GIU', 'DESTRA'];
+    const prog = ['DESTRA', 'SU', 'DESTRA'];
+    out.push({ tipo: 'debug', n: 5, r: 0, c: 0, tr: 1, tc: 2, muri: [], prog, erroreIdx: 1, giusta: giusto[1], sbagliata: 'SU', liv });
+  }
+  return out;
+}
+
+/* --- Classe 5: funzioni con parametri / annidate / condizionali --- */
+function genCod5(liv){
+  const out = [];
+  if (liv === 1){
+    for (let e = 0; e < 5; e++){
+      const nome = unoDi(['passoGrosso', 'doppioPasso', 'mossaLunga']);
+      const ncalls = intTra(2, 3);
+      const tot = ncalls * 4;
+      const dis = [
+        { t: ncalls * 2, spiega: 'Il corpo della funzione contiene 4 istruzioni (3 AVANTI + 1 DESTRA), non 2: ' + ncalls + ' chiamate × 4 = ' + tot + '.' },
+        { t: 4, spiega: '«4» è una sola chiamata: ma il programma chiama la funzione ' + ncalls + ' volte: ' + ncalls + ' × 4 = ' + tot + '.' },
+        { t: ncalls, spiega: '«' + ncalls + '» sono solo le chiamate: ogni chiamata esegue 4 istruzioni, quindi ' + ncalls + ' × 4 = ' + tot + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('<b>FUNZIONE</b> ' + nome + '() {\n  AVANTI\n  AVANTI\n  AVANTI\n  DESTRA\n}\n' + Array(ncalls).fill(nome + '()').join('\n')),
+        domanda: 'Il programma chiama la funzione ' + ncalls + ' volte. Quante istruzioni esegue in tutto?',
+        opzioni: opzioniNum(tot, dis.map(d => ({ t: String(d.t), spiega: d.spiega })), [tot + 1, tot - 1]),
+        spiegaGiusta: 'Funzione = scatola di istruzioni: ogni chiamata esegue il corpo, cioè 4 istruzioni (3 AVANTI + 1 DESTRA). Con ' + ncalls + ' chiamate: ' + ncalls + ' × 4 = ' + tot + '. Le funzioni servono a riusare il codice senza riscriverlo! 🧰'
+      });
+    }
+    return out;
+  }
+  if (liv === 2){
+    const kindPlan = ['parametro', 'restituisci', 'parametro', 'restituisci', 'parametro'];
+    for (const kind of kindPlan){
+      if (kind === 'parametro'){
+        const n1 = intTra(1, 3), n2 = intTra(2, 4);
+        const tot = n1 + n2;
+        const dis = [
+          { t: Number(String(n1) + String(n2)), spiega: 'I due numeri non si attaccano in fila: AVANZA(' + n1 + ') fa ' + n1 + ' passi e AVANZA(' + n2 + ') fa ' + n2 + ' passi, e le chiamate sono una dopo l\u2019altra: ' + n1 + ' + ' + n2 + ' = ' + tot + '.' },
+          { t: n1, spiega: 'Hai fatto solo la prima chiamata (' + n1 + ' passi): manca AVANZA(' + n2 + '), che aggiunge altri ' + n2 + ' passi.' },
+          { t: n2, spiega: 'Hai fatto solo l\u2019ultima chiamata (' + n2 + ' passi): anche AVANZA(' + n1 + ') viene eseguita, con ' + n1 + ' passi.' },
+          { t: n1 * n2, spiega: n1 + ' × ' + n2 + ' è una moltiplicazione: ma le due chiamate sono scritte UNA DOPO L\u2019ALTRA, quindi i passi si sommano: ' + n1 + ' + ' + n2 + ' = ' + tot + '.' }
+        ];
+        out.push({
+          tipo: 'quiz',
+          testa: bloccoCodice('<b>FUNZIONE</b> AVANZA(n) {\n  <b>RIPETI</b> n VOLTE {\n    AVANTI\n  }\n}\nAVANZA(<b>' + n1 + '</b>)\nAVANZA(<b>' + n2 + '</b>)'),
+          domanda: 'Il robot parte dalla casella 0 di un binario. In che casella arriva?',
+          opzioni: opzioniNum(tot, dis, [tot + 1, tot - 1]),
+          spiegaGiusta: 'Il parametro n vale ' + n1 + ' nella prima chiamata (' + n1 + ' passi) e ' + n2 + ' nella seconda (' + n2 + ' passi): ' + n1 + ' + ' + n2 + ' = ' + tot + '. Il robot arriva alla casella ' + tot + '! 🎢'
+        });
+      } else {
+        const x = intTra(2, 9);
+        const tot = x * 2;
+        const dis = [
+          { t: x, spiega: '«' + x + '» è solo l\u2019argomento della chiamata: la funzione restituisce x + x, cioè ' + x + ' + ' + x + ' = ' + tot + '.' },
+          { t: x * 3, spiega: '«' + (x * 3) + '» è come avessi sommato tre volte: la funzione fa x + x, cioè DUE volte ' + x + ': ' + tot + '.' },
+          { t: Number(String(x) + String(x)), spiega: 'x + x non attacca le due cifre: è una vera somma: ' + x + ' + ' + x + ' = ' + tot + '.' }
+        ];
+        out.push({
+          tipo: 'quiz',
+          testa: bloccoCodice('<b>FUNZIONE</b> doppio(x) {\n  <b>RESTITUISCI</b> x + x\n}\ny = doppio(<b>' + x + '</b>)'),
+          domanda: 'Quanto vale y alla fine del programma?',
+          opzioni: opzioniNum(tot, dis, [tot + 1, tot - 2]),
+          spiegaGiusta: 'Chiamando doppio(' + x + '), il parametro x vale ' + x + ' e la funzione restituisce x + x = ' + x + ' + ' + x + ' = ' + tot + '. Il valore torna fuori dalla funzione e finisce in y! 📤'
+        });
+      }
+    }
+    return out;
+  }
+  for (let e = 0; e < 5; e++){
+    const usoAnnidato = rand(2) === 0;
+    if (usoAnnidato){
+      const v = intTra(2, 4), moltiplicando = unoDi([2, 3]);
+      const n1 = v * moltiplicando;
+      const n2 = n1 * moltiplicando;
+      const soglia = rand(2) === 0 ? n2 - 1 : n2 + 1;
+      const condVera = n2 > soglia;
+      const parole = unoDi([['AVANTI', 'GIU'], ['SU', 'DESTRA']]);
+      const dis = [
+        { t: condVera ? parole[1] : parole[0], spiega: 'Calcola a blocchi: doppio×' + moltiplicando + '(' + v + ') = ' + n1 + ', poi di nuovo: ' + n1 + ' × ' + moltiplicando + ' = ' + n2 + '. La condizione ' + n2 + ' > ' + soglia + ' è ' + (condVera ? 'VERA → ramo SE («' + parole[0] + '»)' : 'FALSA → ramo ALTRIMENTI («' + parole[1] + '»)') + '.' },
+        { t: 'si ferma tutto', spiega: 'Le funzioni si eseguono tutte: doppio(' + v + ') = ' + n1 + ', poi doppio(' + n1 + ') = ' + n2 + ', e il SE esegue sicuramente uno dei due rami.' },
+        { t: 'esegue il numero ' + n2, spiega: 'Il robot non può eseguire un numero: il SE sceglie solo tra «' + parole[0] + '» e «' + parole[1] + '», che sono comandi.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('<b>FUNZIONE</b> moltiplica(x) {\n  <b>RESTITUISCI</b> x × ' + moltiplicando + '\n}\nn = moltiplica(' + v + ')\nn = moltiplica(n)\n<b>SE</b> n > <b>' + soglia + '</b> ALLORA\n  esegui "' + parole[0] + '"\n<b>ALTRIMENTI</b>\n  esegui "' + parole[1] + '"'),
+        domanda: 'Quale comando esegue alla fine il robot?',
+        opzioni: [{ t: condVera ? parole[0] : parole[1], giusta: true }].concat(mescola(dis).slice(0, 3).map(d => ({ t: d.t, giusta: false, spiega: d.spiega }))),
+        spiegaGiusta: 'Il risultato di una funzione serve all\u2019altra: moltiplica(' + v + ') = ' + n1 + ', poi moltiplica(' + n1 + ') = ' + n2 + '. La condizione n > ' + soglia + ' è ' + (condVera ? 'VERA → «' + parole[0] + '»' : 'FALSA → ALTRIMENTI: «' + parole[1] + '»') + '.'
+      });
+    } else {
+      const step = intTra(2, 3), ngiri = intTra(2, 3);
+      const tot = step * ngiri;
+      const dis = [
+        { t: tot + step, spiega: 'Un giro in più: i giri del ciclo grande sono ' + ngiri + ': ' + ngiri + ' × ' + step + ' = ' + tot + '.' },
+        { t: tot - step, spiega: 'Un giro in meno: i giri sono ' + ngiri + ': ' + ngiri + ' × ' + step + ' = ' + tot + '.' },
+        { t: ngiri, spiega: '«' + ngiri + '» sono solo i giri: ma ogni chiamata passoLoop(' + step + ') esegue ' + step + ' AVANTI, e viene chiamata a ogni giro: ' + ngiri + ' × ' + step + ' = ' + tot + '.' },
+        { t: step, spiega: '«' + step + '» è il parametro di UNA chiamata: il ciclo ripete la chiamata ' + ngiri + ' volte, quindi ' + ngiri + ' × ' + step + ' = ' + tot + '.' }
+      ];
+      out.push({
+        tipo: 'quiz',
+        testa: bloccoCodice('<b>FUNZIONE</b> passoLoop(k) {\n  <b>RIPETI</b> k VOLTE {\n    AVANTI\n  }\n}\n<b>RIPETI</b> ' + ngiri + ' VOLTE {\n  passoLoop(' + step + ')\n}'),
+        domanda: 'Quante volte in totale il robot esegue AVANTI?',
+        opzioni: opzioniNum(tot, dis, [tot + 1]),
+        spiegaGiusta: 'Ogni giro del ciclo chiama passoLoop(' + step + '), che esegue ' + step + ' AVANTI. Con ' + ngiri + ' giri: ' + ngiri + ' × ' + step + ' = ' + tot + ' AVANTI in tutto! 🚂'
+      });
+    }
+  }
+  return out;
+}
+
+/* ===================== RENDER DEGLI ESERCIZI ===================== */
+const REND = { quiz: rendiQuiz, ordina: rendiOrdina, griglia: rendiGriglia, debug: rendiDebug };
+
+function rendiQuiz(card, ex, fine){
+  const pulito = { ok: true };
+  let finito = false;
+  if (ex.testa) card.appendChild(crea('div', 'es-testa', ex.testa));
+  card.appendChild(crea('div', 'es-domanda', ex.domanda));
+  const corsi = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5'];
+  const grid = crea('div', 'op-grid');
+  let nc = 0;
+  mescola(ex.opzioni).forEach(o => {
+    const b = crea('button', 'op-btn ' + corsi[nc++ % 6], o.t);
+    b.onclick = () => {
+      if (finito) return;
+      if (o.giusta){
+        finito = true;
+        grid.querySelectorAll('button').forEach(x => x.disabled = true);
+        mostraGiusto(card, ex.spiegaGiusta, () => fine(pulito.ok));
+      } else { pulito.ok = false; mostraSbaglio(card, o.spiega); }
+    };
+    grid.appendChild(b);
+  });
+  card.appendChild(grid);
+}
+
+function rendiOrdina(card, ex, fine){
+  const pulito = { ok: true };
+  let finito = false;
+  card.appendChild(crea('div', 'es-domanda', ex.titolo + '<br>Metti i passi nell\u2019ordine giusto! Tocca un passo per aggiungerlo alla sequenza (e toccalo nella sequenza per toglierlo).'));
+  const seq = [];
+  const dispo = mescola(ex.passi.map((p, i) => i));
+  const chips = crea('div', 'chips');
+  const lista = crea('ul', 'seq');
+  const row = crea('div', 'btn-row');
+  const ctrl = crea('button', 'btn btn-ctrl', 'Controlla ▶');
+  const reset = crea('button', 'btn btn-clear', '🔄 Ricomincia');
+  row.appendChild(ctrl); row.appendChild(reset);
+  card.appendChild(crea('div', null, '<b>🧩 Passi da ordinare:</b>'));
+  card.appendChild(chips);
+  card.appendChild(crea('div', null, '<b>🔢 La tua sequenza:</b>'));
+  card.appendChild(lista);
+  card.appendChild(row);
+  function ridisegna(){
+    chips.innerHTML = '';
+    lista.innerHTML = '';
+    dispo.forEach(i => {
+      const b = crea('button', 'chip', ex.passi[i].t);
+      b.onclick = () => { seq.push(i); ridisegna(); };
+      chips.appendChild(b);
+    });
+    seq.forEach((i, pos) => {
+      const li = crea('li', 'seq-item');
+      li.appendChild(crea('span', 'seq-num', String(pos + 1)));
+      li.appendChild(crea('span', null, ex.passi[i].t));
+      li.onclick = () => { seq.splice(pos, 1); ridisegna(); };
+      lista.appendChild(li);
+    });
+  }
+  reset.onclick = () => { seq.length = 0; ridisegna(); };
+  ctrl.onclick = () => {
+    if (finito) return;
+    if (seq.length !== ex.passi.length){
+      mostraSbaglio(card, 'La sequenza deve contenere tutti i ' + ex.passi.length + ' passi (senza ripeterli). Aggiungi quelli che mancano e poi controlla!');
+      return;
+    }
+    let iErr = -1;
+    for (let i = 0; i < ex.passi.length; i++){ if (seq[i] !== i){ iErr = i; break; } }
+    if (iErr === -1){
+      finito = true;
+      chips.querySelectorAll('button').forEach(x => x.disabled = true);
+      mostraGiusto(card, ex.spiegaGiusta, () => fine(pulito.ok));
+      return;
+    }
+    pulito.ok = false;
+    const scelto = ex.passi[seq[iErr]];
+    const giusto = ex.passi[iErr];
+    let msg;
+    if (seq[iErr] > iErr){
+      msg = 'Al pass ' + (iErr + 1) + ' hai messo «' + scelto.t + '»: non può venire ancora, perché ' + scelto.why + '. In quel punto deve andare «' + giusto.t + '».';
+    } else {
+      msg = 'Al pass ' + (iErr + 1) + ' hai messo «' + scelto.t + '»: ma quello andava fatto PRIMA! Infatti ' + scelto.why + '. In quel punto deve andare «' + giusto.t + '».';
+    }
+    mostraSbaglio(card, msg);
+  };
+  ridisegna();
+}
+
+function cellaGriglia(ex, r, c, robPos, passi){
+  let em = '', cls = '';
+  if (ex.muri.some(w => w[0] === r && w[1] === c)){ em = '🧱'; cls = 'muro'; }
+  else if (r === ex.tr && c === ex.tc) em = '💎';
+  else if (passi && passi.some(p => p[0] === r && p[1] === c && !(p[0] === robPos[0] && p[1] === robPos[1]))) { em = '🐾'; cls = 'orma'; }
+  if (r === robPos[0] && c === robPos[1]) em = '🤖';
+  return '<td class="' + cls + '">' + em + '</td>';
+}
+function grigliaHtml(ex, robPos, passi){
+  let t = '';
+  for (let r = 0; r < ex.n; r++){
+    t += '<tr>';
+    for (let c = 0; c < ex.n; c++) t += cellaGriglia(ex, r, c, robPos, passi || []);
+    t += '</tr>';
+  }
+  return '<div class="griglia-box"><table class="griglia">' + t + '</table><div style="font-size:.9rem;margin-top:4px">righe 1\u20135 dall\u2019alto, colonne 1\u20135 da sinistra</div></div>';
+}
+
+function rendiGriglia(card, ex, fine){
+  const pulito = { ok: true };
+  let finito = false;
+  let prog = [];
+  const testa = crea('div', 'es-testa');
+  card.appendChild(testa);
+  card.appendChild(crea('div', 'es-domanda', 'Programma il robot con le frecce per portarlo al tesoro 💎! Costruisci il programma, poi premi «Esegui ▶».<div class="indizio">Suggerimento: conta le caselle dal robot al tesoro. Il robot si muove di UNA casella per ogni freccia.</div>'));
+  card.appendChild(crea('div', null, '<b>Il tuo programma:</b> <span style="font-size:.9rem">(tocca una freccia nel programma per cancellarla)</span>'));
+  const progList = crea('div', 'prog-list');
+  card.appendChild(progList);
+  const rowArrows = crea('div', 'btn-row');
+  const frecOr = [['SU', 'fre-su'], ['GIU', 'fre-giu'], ['SINISTRA', 'fre-si'], ['DESTRA', 'fre-de']];
+  frecOr.forEach(pair => {
+    const b = crea('button', 'arrow-btn ' + pair[1], FRECCE[pair[0]].em);
+    b.title = pair[0];
+    b.onclick = () => { prog.push(pair[0]); ridisegna(); };
+    rowArrows.appendChild(b);
+  });
+  card.appendChild(rowArrows);
+  const rowBtn = crea('div', 'btn-row');
+  const esegui = crea('button', 'btn btn-exec', 'Esegui ▶');
+  const svuota = crea('button', 'btn btn-clear', '🗑 Svuota');
+  rowBtn.appendChild(esegui); rowBtn.appendChild(svuota);
+  card.appendChild(rowBtn);
+  function ridisegna(tabHtml){
+    testa.innerHTML = tabHtml == null ? grigliaHtml(ex, [ex.r, ex.c], []) : tabHtml;
+    progList.innerHTML = '';
+    if (prog.length === 0) progList.appendChild(crea('span', null, '<i style="color:#888">(vuoto: aggiungi le frecce!)</i>'));
+    prog.forEach((f, i) => {
+      const b = crea('button', 'prog-ins', (i + 1) + '. ' + FRECCE[f].em + ' ' + f);
+      b.onclick = () => { prog.splice(i, 1); ridisegna(); };
+      progList.appendChild(b);
+    });
+  }
+  svuota.onclick = () => { prog = []; ridisegna(); };
+  esegui.onclick = () => {
+    if (finito) return;
+    if (prog.length === 0){
+      mostraSbaglio(card, 'Il programma è vuoto: il robot non può muoversi! Aggiungi qualche freccia e premi Esegui ▶');
+      return;
+    }
+    const sim = simulaGriglia(ex, prog);
+    if (sim.ok){
+      finito = true;
+      esegui.disabled = true;
+      svuota.disabled = true;
+      rowArrows.querySelectorAll('button').forEach(x => x.disabled = true);
+      ridisegna(grigliaHtml(ex, sim.passi[sim.passi.length - 1], sim.passi));
+      const conti = descriviMosse(ex.tr - ex.r, ex.tc - ex.c);
+      mostraGiusto(card, 'Perfetto! Il robot ha eseguito i tuoi ' + prog.length + ' comandi ed è arrivato esattamente sul tesoro 💎. La strada era: ' + conti + '. Sei un vero programmatore! 🤖', () => fine(pulito.ok));
+      return;
+    }
+    pulito.ok = false;
+    ridisegna(grigliaHtml(ex, [sim.r, sim.c], sim.passi));
+    let msg;
+    if (sim.crash){
+      const f = prog[sim.crash - 1];
+      msg = 'Al pass ' + sim.crash + ' il robot esegue «' + FRECCE[f].em + ' ' + f + '», ma dalla sua casella c\u2019è ' + (sim.crashMotivo === 'muro' ? 'un muro 🧱!' : 'il bordo della griglia: il robot non può uscire!') + ' Il robot si ferma e il tesoro resta irraggiungibile. Togli quella freccia (toccala nel programma) o sostituiscila!';
+    } else {
+      const dr = ex.tr - sim.r, dc = ex.tc - sim.c;
+      const movi = descriviMosse(dr, dc);
+      msg = 'Il robot è arrivato alla casella (riga ' + (sim.r + 1) + ', colonna ' + (sim.c + 1) + '), ma il tesoro è nella casella (riga ' + (ex.tr + 1) + ', colonna ' + (ex.tc + 1) + '). Conta sull\u2019immagine: dal robot al tesoro manca ' + movi + '. Correggi il programma e riprova!';
+    }
+    mostraSbaglio(card, msg);
+  };
+  ridisegna();
+}
+function descriviMosse(dr, dc){
+  const pezzi = [];
+  function numPasso(x, parola){
+    return x + (x === 1 ? ' passo' : ' passi') + ' ' + parola;
+  }
+  if (dr === 0 && dc === 0) return 'nessun movimento (il robot è già lì!)';
+  if (dr > 0) pezzi.push(numPasso(dr, 'in GIÙ ⬇️'));
+  if (dr < 0) pezzi.push(numPasso(-dr, 'in SU ⬆️'));
+  if (dc > 0) pezzi.push(numPasso(dc, 'a DESTRA ➡️'));
+  if (dc < 0) pezzi.push(numPasso(-dc, 'a SINISTRA ⬅️'));
+  return pezzi.join(' e ');
+}
+
+function rendiDebug(card, ex, fine){
+  const pulito = { ok: true };
+  let fase = 1;
+  const testa = crea('div', 'es-testa');
+  card.appendChild(testa);
+  const obiettivo = 'Il robot deve arrivare al tesoro 💎, ma in questo programma c\u2019è UNA SOLA istruzione sbagliata. Tocca l\u2019istruzione che non va!<div class="indizio">Suggerimento: simula il programma passo passo e trova il momento in cui il robot si allontana dal tesoro.</div>';
+  card.appendChild(crea('div', 'es-domanda', obiettivo));
+  const progList = crea('div', 'prog-list');
+  card.appendChild(progList);
+  const post = crea('div', null, '');
+  card.appendChild(post);
+  const mc = { r: ex.r, c: ex.c, tr: ex.tr, tc: ex.tc, n: ex.n, muri: ex.muri };
+  testa.innerHTML = grigliaHtml(mc, [ex.r, ex.c], []);
+  function messaggioCrash(sim, progMod){
+    return 'Al pass ' + sim.crash + ' il robot esegue «' + FRECCE[progMod[sim.crash - 1]].em + ' ' + progMod[sim.crash - 1] + '», ma dalla sua casella c\u2019è ' + (sim.crashMotivo === 'muro' ? 'un muro 🧱!' : 'il bordo della griglia!') + ' Così il tesoro resta irraggiungibile.';
+  }
+  function messaggioFine(sim){
+    const movi = descriviMosse(ex.tr - sim.r, ex.tc - sim.c);
+    return 'Quel programma porta il robot alla casella (riga ' + (sim.r + 1) + ', colonna ' + (sim.c + 1) + '), ma il tesoro è alla casella (riga ' + (ex.tr + 1) + ', colonna ' + (ex.tc + 1) + '). Dalla posizione del robot al tesoro manca ' + movi + '.';
+  }
+  function ridisegnaProgramma(){
+    progList.innerHTML = '';
+    ex.prog.forEach((f, i) => {
+      let cls = 'prog-ins';
+      if (fase === 2 && i === ex.erroreIdx) cls += ' err';
+      const b = crea('button', cls, (i + 1) + '. ' + FRECCE[f].em + ' ' + f);
+      b.onclick = () => {
+        if (fase !== 1) return;
+        if (i === ex.erroreIdx){
+          fase = 2;
+          ridisegnaProgramma();
+          post.innerHTML = '✅ <b>Bravo!</b> L\u2019istruzione ' + (i + 1) + ' («' + FRECCE[f].em + ' ' + f + '») è quella sbagliata.' +
+            '<br>A quale freccia deve sostituirla per portare il robot al tesoro? Tocca la freccia giusta 👇' +
+            '<div class="btn-row" id="fix-row"></div>';
+          const fr = post.querySelector('#fix-row');
+          Object.keys(FRECCE).forEach(f2 => {
+            const bf = crea('button', 'arrow-btn fre-' + ({ SU: 'su', GIU: 'giu', SINISTRA: 'si', DESTRA: 'de' }[f2]), FRECCE[f2].em);
+            bf.title = f2;
+            bf.onclick = () => correggi(f2);
+            fr.appendChild(bf);
+          });
+          window.scrollTo(0, document.body.scrollHeight);
+        } else {
+          pulito.ok = false;
+          let msg;
+          if (i < ex.erroreIdx){
+            msg = 'L\u2019istruzione ' + (i + 1) + ' («' + FRECCE[f].em + ' ' + f + '») va bene cos\u00ec: per i primi ' + (i + 1) + ' passi il robot resta sulla buona strada verso il tesoro. C\u2019è UN solo errore: guarda i passi DOPO questo!';
+          } else {
+            msg = 'Il problema nasce PRIMA del pass ' + (i + 1) + ': quando il robot arriva lì, la strada è già andata storta per colpa di un pass precedente. C\u2019è una sola istruzione sbagliata: ricontrolla i primi passi!';
+          }
+          mostraSbaglio(card, msg);
+        }
+      };
+      progList.appendChild(b);
+    });
+  }
+  let finitoD = false;
+  function correggi(f2){
+    if (finitoD) return;
+    const progMod = ex.prog.slice();
+    progMod[ex.erroreIdx] = f2;
+    const sim = simulaGriglia(mc, progMod);
+    if (sim.ok){
+      finitoD = true;
+      progList.querySelectorAll('button').forEach(x => x.disabled = true);
+      testa.innerHTML = grigliaHtml(mc, sim.passi[sim.passi.length - 1], sim.passi);
+      mostraGiusto(card, '«' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': era proprio quello che mancava! Ora il programma porta il robot esattamente al tesoro 💎. Hai fatto da vero DEBUGGER: hai trovato e corretto l\u2019errore! 🐛🔧', () => fine(pulito.ok));
+      post.innerHTML = '';
+    } else {
+      pulito.ok = false;
+      window.scrollTo(0, document.body.scrollHeight);
+      if (sim.crash) mostraSbaglio(card, 'Con «' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': ' + messaggioCrash(sim, progMod) + ' Prova un\u2019altra freccia!');
+      else mostraSbaglio(card, 'Con «' + FRECCE[f2].em + ' ' + f2 + '» al pass ' + (ex.erroreIdx + 1) + ': ' + messaggioFine(sim) + ' Prova un\u2019altra freccia!');
+    }
+  }
+  ridisegnaProgramma();
+}
+
+/* ===================== AVVIO ===================== */
+aggStelle();
+aggMaiuscolo();
+schermoMateria();
+</script>
+</body>
+</html>
