@@ -36,6 +36,11 @@
   }
   .big-btn small { display: block; font-size: .85rem; font-weight: normal; opacity: .95; margin-top: 6px; }
   .big-btn:hover { transform: translateY(-3px); }
+  .lvl-sez { font-size: 1.15rem; font-weight: bold; margin: 14px 0 8px; color: #455a64; }
+  .lvl-grid { display: grid; gap: 8px; grid-template-columns: repeat(5, 1fr); }
+  .lvl-btn { border: none; border-radius: 14px; padding: 10px 4px; font-size: 1.1rem; font-weight: bold; color: #fff; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.18); font-family: inherit; }
+  .lvl-btn:hover { transform: translateY(-2px); }
+  .lvl-btn .liv-stelle { font-size: .7rem; letter-spacing: 1px; margin-top: 3px; }
   .bg-mat { background: linear-gradient(135deg, #ff7043, #ff9f43); }
   .bg-cod { background: linear-gradient(135deg, #26a69a, #4dd0e1); }
   .bg-cl1 { background: linear-gradient(135deg, #ef5350, #ff8a65); }
@@ -237,7 +242,7 @@ function schermoClasse(){
   const card = crea('div', 'card');
   const grid = crea('div', 'big-grid');
   const nomeCl = { 1: '1ª elementare', 2: '2ª elementare', 3: '3ª elementare', 4: '4ª elementare', 5: '5ª elementare' };
-  const nota = { 1: 'Testo tutto in MAIUSCOLO', 2: 'Testo tutto in MAIUSCOLO', 3: 'Hai il pulsante MAIUSCOLO (BES/DSA)', 4: 'Hai il pulsante MAIUSCOLO (BES/DSA)', 5: 'Hai il pulsante MAIUSCOLO (BES/DSA)' };
+  const nota = { 1: 'Testo tutto in MAIUSCOLO', 2: 'Testo tutto in MAIUSCOLO', 3: 'Con il pulsante puoi attivare il MAIUSCOLO', 4: 'Con il pulsante puoi attivare il MAIUSCOLO', 5: 'Con il pulsante puoi attivare il MAIUSCOLO' };
   [1, 2, 3, 4, 5].forEach(n => {
     const b = crea('button', 'big-btn bg-cl' + n, n + 'ª<small>' + nota[n] + '</small>');
     b.onclick = () => { state.classe = n; schermoLivello(); };
@@ -253,29 +258,33 @@ function schermoLivello(){
   const nomiMat = { mat: '➗ Matematica', cod: '💻 Coding' };
   app.appendChild(crea('div', 'titolo-sezione', nomiMat[state.materia] + ' — ' + state.classe + 'ª classe: scegli il livello'));
   const card = crea('div', 'card');
-  const grid = crea('div', 'big-grid');
   [
-    [1, '🌱 Facile', 'Primi passi tranquilli'],
-    [2, '🚀 Medio', 'Un po\' più di sfida'],
-    [3, '🔥 Difficile', 'Massima potenza!']
-  ].forEach(pair => {
-    const [n, nome, desc] = pair;
-    const k = state.materia + '-' + state.classe + '-' + n;
-    const st = state.stelle[k] || 0;
-    const b = crea('button', 'big-btn bg-l' + n, 'Livello ' + n + ' ' + nome + '<small>' + desc + '</small>');
-    const stelleTxt = st > 0 ? ('⭐'.repeat(st) + '☆'.repeat(5 - st)) : '☆☆☆☆☆';
-    b.appendChild(crea('div', 'liv-stelle', stelleTxt));
-    b.onclick = () => { state.livello = n; iniziaLivello(); };
-    grid.appendChild(b);
+    [1, '🌱 FACILE', 'bg-l1'],
+    [11, '🚀 MEDIO', 'bg-l2'],
+    [21, '🔥 DIFFICILE', 'bg-l3']
+  ].forEach(sez => {
+    const [da, nome, cls] = sez;
+    card.appendChild(crea('div', 'lvl-sez', nome));
+    const grid = crea('div', 'lvl-grid');
+    for (let n = da; n < da + 10; n++){
+      const k = state.materia + '-' + state.classe + '-' + n;
+      const st = state.stelle[k] || 0;
+      const stelleTxt = st > 0 ? ('⭐'.repeat(st) + '☆'.repeat(5 - st)) : '☆☆☆☆☆';
+      const b = crea('button', 'lvl-btn ' + cls, String(n));
+      b.appendChild(crea('div', 'liv-stelle', stelleTxt));
+      b.onclick = () => { state.livello = n; iniziaLivello(); };
+      grid.appendChild(b);
+    }
+    card.appendChild(grid);
   });
-  card.appendChild(grid); app.appendChild(card);
+  app.appendChild(card);
   app.appendChild(crea('div', '', '<div class="btn-row"><button class="btn-mini" id="indietro-lv">⬅️ Cambia classe</button></div>'));
   document.getElementById('indietro-lv').onclick = () => { state.classe = null; schermoClasse(); };
 }
 
 /* ===================== MOTORE DEGLI ESERCIZI ===================== */
 function iniziaLivello(){
-  state.esercizi = (state.materia === 'mat' ? genMat : genCod)(state.classe, state.livello);
+  state.esercizi = (state.materia === 'mat' ? genMat : genCod)(state.classe, Math.ceil(state.livello / 10));
   state.idx = 0;
   state.stelleSessione = 0;
   aggMaiuscolo();
