@@ -399,7 +399,7 @@ function genMat1(liv){
     let start, mosse, max;
     if (liv === 1){ start = rand(5); mosse = []; const nm = 2 + rand(2); for (let i = 0; i < nm; i++) mosse.push(rand(2) ? 1 : -1); max = 10; }
     else if (liv === 2){ start = rand(7); mosse = []; for (let i = 0; i < 3; i++) mosse.push(rand(2) ? 1 : -1); max = 12; }
-    else { start = rand(5); mosse = []; for (let i = 0; i < 3; i++) mosse.push(rand(2) ? 2 : -2); max = 20; }
+    else { start = rand(8); mosse = []; const nm3 = 3 + rand(2); for (let i = 0; i < nm3; i++) mosse.push(rand(2) ? 2 : -2); max = 20; }
     let p = start, dentro = true; const pos = [start];
     for (const m of mosse){ p += m; if (p < 0 || p > max) dentro = false; pos.push(p); }
     if (!dentro || pos.every(x => x === start)) continue;
@@ -810,6 +810,50 @@ const SCENARI = [
       { t: 'Chiama il cane', why: 'il cane si chiama dopo che il suo pasto è pronto' },
       { t: 'Lava la ciotola quando ha finito', why: 'la ciotola si lava solo dopo che il cane ha mangiato' }
     ]
+  },
+  {
+    titolo: '\ud83c\udf55 Preparare una pizza',
+    passi: [
+      { t: 'Spianare l’impasto sul piano', why: 'prima di condire serve la base stesa' },
+      { t: 'Versa il pomodoro e spargilo', why: 'il pomodoro va sull\u2019impasto che è già steso' },
+      { t: 'Aggiungi la mozzarella', why: 'la mozzarella va sopra il pomodoro' },
+      { t: 'Metti la pizza nel forno caldo', why: 'in forno va la pizza già condita' },
+      { t: 'Cuocila per dieci minuti', why: 'la cottura avviene quando la pizza è in forno' },
+      { t: 'Sforna la pizza e tagliala', why: 'si taglia la pizza solo dopo averla cotta' }
+    ]
+  },
+  {
+    titolo: '\ud83e\uddfa Fare il bucato',
+    passi: [
+      { t: 'Raccogli il bucato sporco nel cestino', why: 'prima serve avere il bucato raccolto' },
+      { t: 'Dividi i capi chiari dai capi scuri', why: 'si divide il bucato prima di metterlo in lavatrice' },
+      { t: 'Metti i capi nella lavatrice', why: 'in lavatrice vanno i capi già divisi' },
+      { t: 'Versa il detersivo nel cassetto', why: 'il detersivo si versa prima di avviare il lavaggio' },
+      { t: 'Avvia il programma di lavaggio', why: 'il lavaggio parte quando c\u2019è tutto dentro' },
+      { t: 'Stendere i panni quando il ciclo finisce', why: 'i panni si stendono solo a lavaggio finito' }
+    ]
+  },
+  {
+    titolo: '\ud83d\ude8c Prendere l\u2019autobus per la scuola',
+    passi: [
+      { t: 'Esci di casa con lo zaino', why: 'per andare a scuola prima devi uscire' },
+      { t: 'Cammina fino alla fermata', why: 'l\u2019autobus lo aspetti alla fermata, non davanti a casa' },
+      { t: 'Controlla il numero del tuo autobus', why: 'devi sapere quale autobus prendere prima di salire' },
+      { t: 'Aspetta che arrivi il tuo autobus', why: 'salire sull\u2019autobus sbagliato porta nel luogo sbagliato' },
+      { t: 'Sali e convalida il biglietto', why: 'il biglietto si convalida appena salito' },
+      { t: 'Scendi quando arrivi alla scuola', why: 'scendi solo quando l\u2019autobus è alla tua fermata' }
+    ]
+  },
+  {
+    titolo: '\ud83e\uddf9 Riordinare la scrivania',
+    passi: [
+      { t: 'Togli tutto dal piano della scrivania', why: 'per riordinare serve prima il piano libero' },
+      { t: 'Butta i ritagli di carta via', why: 'i ritagli inutili si buttano prima di sistemare il resto' },
+      { t: 'Impila i quaderni per materia', why: 'i quaderni si impilano dopo aver liberato il piano' },
+      { t: 'Rimetti le penne nel portapenne', why: 'le penne si sistemano dopo i quaderni' },
+      { t: 'Passa il panno sul piano', why: 'il piano si pulisce quando è già vuoto' },
+      { t: 'Sistema la sedia e guarda il risultato', why: 'alla fine controlli il lavoro fatto' }
+    ]
   }
 ];
 
@@ -948,8 +992,9 @@ function genCod3(liv){
 function genCod4(liv){
   const len = liv === 1 ? 3 : (liv === 2 ? 5 : 7);
   const out = [];
+  const viste = new Set();
   let tentativo = 0;
-  while (out.length < 5 && tentativo < 2000){
+  while (out.length < 5 && tentativo < 4000){
     tentativo++;
     const r = rand(5), c = rand(5);
     let dr = 0, dc = 0, tr = -1, tc = -1;
@@ -970,19 +1015,29 @@ function genCod4(liv){
     prog[iErr] = sbagliata;
     const exTest = { r, c, tr, tc, n: 5, muri: [] };
     if (simulaGriglia(exTest, prog).ok) continue;
+    const chiave = r + ',' + c + ',' + tr + ',' + tc + ',' + iErr + ',' + sbagliata;
+    if (viste.has(chiave)) continue;
     let unica = true;
     for (const f of Object.keys(FRECCE)){
-      if (f === sbagliata) continue;
+      if (f === sbagliata || f === giusto[iErr]) continue;
       const p2 = prog.slice(); p2[iErr] = f;
       if (simulaGriglia(exTest, p2).ok){ unica = false; break; }
     }
     if (!unica) continue;
+    viste.add(chiave);
     out.push({ tipo: 'debug', n: 5, r, c, tr, tc, muri: [], prog, erroreIdx: iErr, giusta: giusto[iErr], sbagliata, liv });
   }
+  const riserve = [
+    { r: 0, c: 0, tr: 1, tc: 2, prog: ['DESTRA', 'SU', 'DESTRA'], erroreIdx: 1, giusta: 'GIU', sbagliata: 'SU' },
+    { r: 0, c: 0, tr: 2, tc: 1, prog: ['GIU', 'GIU', 'SU'], erroreIdx: 2, giusta: 'DESTRA', sbagliata: 'SU' },
+    { r: 4, c: 4, tr: 4, tc: 1, prog: ['SINISTRA', 'SU', 'SINISTRA'], erroreIdx: 1, giusta: 'SINISTRA', sbagliata: 'SU' },
+    { r: 0, c: 4, tr: 0, tc: 1, prog: ['SINISTRA', 'SU', 'SINISTRA'], erroreIdx: 1, giusta: 'SINISTRA', sbagliata: 'SU' },
+    { r: 2, c: 0, tr: 0, tc: 1, prog: ['SU', 'SU', 'GIU'], erroreIdx: 2, giusta: 'DESTRA', sbagliata: 'GIU' }
+  ];
+  let k = 0;
   while (out.length < 5){
-    const giusto = ['DESTRA', 'GIU', 'DESTRA'];
-    const prog = ['DESTRA', 'SU', 'DESTRA'];
-    out.push({ tipo: 'debug', n: 5, r: 0, c: 0, tr: 1, tc: 2, muri: [], prog, erroreIdx: 1, giusta: giusto[1], sbagliata: 'SU', liv });
+    const m = riserve[k % riserve.length]; k++;
+    out.push({ tipo: 'debug', n: 5, r: m.r, c: m.c, tr: m.tr, tc: m.tc, muri: [], prog: m.prog.slice(), erroreIdx: m.erroreIdx, giusta: m.giusta, sbagliata: m.sbagliata, liv });
   }
   return out;
 }
@@ -992,8 +1047,8 @@ function genCod5(liv){
   const out = [];
   if (liv === 1){
     for (let e = 0; e < 5; e++){
-      const nome = unoDi(['passoGrosso', 'doppioPasso', 'mossaLunga']);
-      const ncalls = intTra(2, 3);
+      const nome = unoDi(['passoGrosso', 'doppioPasso', 'mossaLunga', 'mossaRapida', 'saltoLungo']);
+      const ncalls = intTra(2, 5);
       const tot = ncalls * 4;
       const dis = [
         { t: ncalls * 2, spiega: 'Il corpo della funzione contiene 4 istruzioni (3 AVANTI + 1 DESTRA), non 2: ' + ncalls + ' chiamate × 4 = ' + tot + '.' },
@@ -1014,7 +1069,7 @@ function genCod5(liv){
     const kindPlan = ['parametro', 'restituisci', 'parametro', 'restituisci', 'parametro'];
     for (const kind of kindPlan){
       if (kind === 'parametro'){
-        const n1 = intTra(1, 3), n2 = intTra(2, 4);
+        const n1 = intTra(1, 6), n2 = intTra(2, 9);
         const tot = n1 + n2;
         const dis = [
           { t: Number(String(n1) + String(n2)), spiega: 'I due numeri non si attaccano in fila: AVANZA(' + n1 + ') fa ' + n1 + ' passi e AVANZA(' + n2 + ') fa ' + n2 + ' passi, e le chiamate sono una dopo l\u2019altra: ' + n1 + ' + ' + n2 + ' = ' + tot + '.' },
@@ -1051,12 +1106,12 @@ function genCod5(liv){
   for (let e = 0; e < 5; e++){
     const usoAnnidato = rand(2) === 0;
     if (usoAnnidato){
-      const v = intTra(2, 4), moltiplicando = unoDi([2, 3]);
+      const v = intTra(2, 5), moltiplicando = unoDi([2, 3]);
       const n1 = v * moltiplicando;
       const n2 = n1 * moltiplicando;
-      const soglia = rand(2) === 0 ? n2 - 1 : n2 + 1;
+      const soglia = n2 + unoDi([-2, -1, 1, 2]);
       const condVera = n2 > soglia;
-      const parole = unoDi([['AVANTI', 'GIU'], ['SU', 'DESTRA']]);
+      const parole = unoDi([['AVANTI', 'GIU'], ['SU', 'DESTRA'], ['DESTRA', 'SINISTRA']]);
       const dis = [
         { t: condVera ? parole[1] : parole[0], spiega: 'Calcola a blocchi: doppio×' + moltiplicando + '(' + v + ') = ' + n1 + ', poi di nuovo: ' + n1 + ' × ' + moltiplicando + ' = ' + n2 + '. La condizione ' + n2 + ' > ' + soglia + ' è ' + (condVera ? 'VERA → ramo SE («' + parole[0] + '»)' : 'FALSA → ramo ALTRIMENTI («' + parole[1] + '»)') + '.' },
         { t: 'si ferma tutto', spiega: 'Le funzioni si eseguono tutte: doppio(' + v + ') = ' + n1 + ', poi doppio(' + n1 + ') = ' + n2 + ', e il SE esegue sicuramente uno dei due rami.' },
@@ -1070,7 +1125,7 @@ function genCod5(liv){
         spiegaGiusta: 'Il risultato di una funzione serve all\u2019altra: moltiplica(' + v + ') = ' + n1 + ', poi moltiplica(' + n1 + ') = ' + n2 + '. La condizione n > ' + soglia + ' è ' + (condVera ? 'VERA → «' + parole[0] + '»' : 'FALSA → ALTRIMENTI: «' + parole[1] + '»') + '.'
       });
     } else {
-      const step = intTra(2, 3), ngiri = intTra(2, 3);
+      const step = intTra(2, 5), ngiri = intTra(2, 5);
       const tot = step * ngiri;
       const dis = [
         { t: tot + step, spiega: 'Un giro in più: i giri del ciclo grande sono ' + ngiri + ': ' + ngiri + ' × ' + step + ' = ' + tot + '.' },
